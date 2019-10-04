@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*model_weights*
 
 # C extensions
 *.so
