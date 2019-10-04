@@ -149,15 +149,77 @@ def get_prediction(wsi_path,
 
 
    
+def predictImage(img_path, 
+			patch_size  = 256, 
+			stride_size = 128,
+			batch_size  = 64,
+			quick       = False,
+			tta_list    = None,
+			crf         = False,
+			save_path   = '../Results'):
+	"""
+	 ['FLIP_LEFT_RIGHT', 'ROTATE_90', 'ROTATE_180', 'ROTATE_270']
+	"""
+	model_path_inception = '../model_weights/inception.h5'
+	model_path_deeplabv3 = '../model_weights/deeplabv3.h5'
+	model_path_densenet2 = '../model_weights/densenet_fold2.h5'
+	model_path_densenet1 = '../model_weights/densenet_fold1.h5'
+
+
+	core_config = tf.ConfigProto()
+	core_config.gpu_options.allow_growth = True 
+	session =tf.Session(config=core_config) 
+	K.set_session(session)
+
+	if not quick:
+		models_to_consider = {'dense1': model_path_densenet1,
+						  'dense2': model_path_densenet2, 
+						  'inception': model_path_inception, 
+						  'deeplabv3': model_path_deeplabv3}
+	else:
+		models_to_consider = {'dense1': model_path_densenet1}
+
+	models = {}
+	for i, model_name in enumerate(models_to_consider.keys()):
+		models[model_name] = load_trained_models(model_name, 
+								models_to_consider[model_name])
+
+	threshold = 0.5
+
+	if not os.path.exists(os.path.join(save_path)):
+		os.makedirs(os.path.join(save_path))
+	
+	img, probs_map, count_map, tissue_mask  = get_prediction(img_path, 
+									mask_path = None, 
+									label_path = None,
+					  			        batch_size = batch_size,
+									tta_list = tta_list,
+									models = models)
+	count_map[count_map == 0] = 1
+	for key in probs_map.keys():
+		probs_map[key] = BinMorphoProcessMask(probs_map[key]*(tissue_mask>0).astype('float'))
+			
+	mean_probs = get_mean_img(probs_map.values(), count_map)[..., None]
+	
+	if crf:
+		pred = post_process_crf(img, np.concatenate([1-mean_probs, mean_probs], axis = -1) , 2)
+	else 
+		pred = mean_probs[:, :, 0] > threshold
+
+	
+	img_name = img_path.split("/")[-1]
+	pred = Image.fromarray(pred.astype('uint8'))
+	pred.save(os.path.join(save_path, img_name))
+	return np.array(pred)
 
 
 if __name__ == "__main__":
 
 	# create session with models
-	model_path_inception = 'model_weights/inception.h5'
-	model_path_deeplabv3 = 'model_weights/deeplabv3.h5'
-	model_path_densenet2 = 'model_weights/densenet_fold2.h5'
-	model_path_densenet1 = 'model_weights/densenet_fold1.h5'
+	model_path_inception = '../model_weights/inception.h5'
+	model_path_deeplabv3 = '../model_weights/deeplabv3.h5'
+	model_path_densenet2 = '../model_weights/densenet_fold2.h5'
+	model_path_densenet1 = '../model_weights/densenet_fold1.h5'
 
 	patch_size = 256
 	stride_size = 128
