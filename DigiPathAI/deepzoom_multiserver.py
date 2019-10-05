@@ -136,8 +136,9 @@ def index():
 def slide(path):
     slide = _get_slide(path)
     slide_url = url_for('dzi', path=path)
+    import ipdb;ipdb.set_trace()
     return render_template('slide-multipane.html', slide_url=slide_url,
-            slide_filename=slide.filename, slide_mpp=slide.mpp)
+            slide_filename=slide.filename, slide_mpp=slide.mpp, root_dir=_Directory(app.basedir) )
 
 
 @app.route('/<path:path>.dzi')
@@ -211,4 +212,4 @@ if __name__ == '__main__':
     except IndexError:
         pass
 
-    app.run(host=opts.host, port=opts.port, threaded=True)
+    app.run(host=opts.host, port=opts.port,debug=True, threaded=True)
