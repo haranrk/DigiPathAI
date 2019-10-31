@@ -26,7 +26,7 @@ from openslide.deepzoom import DeepZoomGenerator
 from optparse import OptionParser
 import re
 from unicodedata import normalize
-from Segmentation import predictImage
+# from Segmentation import predictImage
 
 DEEPZOOM_SLIDE = None
 DEEPZOOM_FORMAT = 'jpeg'

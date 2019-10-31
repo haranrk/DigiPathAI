@@ -92,6 +92,34 @@ div#properties dd {
     {% else %}
         <span class="associated-images notice">None</span>
     {% endif %}
+    <ul>
+        {% for entry in root_dir.children recursive %}
+            <li>
+                {% if entry.url_path %}
+                    <a href="{{ url_for('slide', path=entry.url_path) }}">
+                        {{ entry.name }}
+                    </a>
+                {% else %}
+                    {{ entry.name }}
+                {% endif %}
+
+                {% if entry.children %}
+                    <ul>
+                        {{ loop(entry.children) }}
+                    </ul>
+                {% endif %}
+            </li>
+        {% else %}
+            <li class="none">None</li>
+        {% endfor %}
+    </ul>
+    <div>
+        <!-- Rounded switch -->
+        <label class="switch">
+          <input id="toggle-btn" type="checkbox">
+          <span class="slider round"></span>
+        </label>
+    </div>
 </div>
 <div id="view"></div>
 <div id="properties">
@@ -145,29 +173,84 @@ $(document).ready(function() {
     });
 
     function open_slide(url, mpp) {
-        var tile_source;
+        var tile_source, mask_source;
+        var mask_url = url.replace("slide", "mask");
+
+        console.log(url);
         if (dzi_data[url]) {
+            console.log("if");
             // DZI XML provided as template argument (deepzoom_tile.py)
             tile_source = new OpenSeadragon.DziTileSource(
                     OpenSeadragon.DziTileSource.prototype.configure(
                     OpenSeadragon.parseXml(dzi_data[url]), url));
+            mask_source = new OpenSeadragon.DziTileSource(
+                    OpenSeadragon.DziTileSource.prototype.configure(
+                    OpenSeadragon.parseXml(dzi_data[mask_url]), mask_url));
         } else {
+            console.log("else");
             // DZI XML fetched from server (deepzoom_server.py)
             tile_source = url;
+            mask_source = mask_url
         }
-        viewer.open(tile_source);
+        viewer.open([
+            {
+                tileSource: tile_source,
+                x: 0
+            },
+            {
+                tileSource: mask_source,
+                opacity: .7,
+                x: 0
+            }
+        ]);
+        //viewer.open(mask_source);
         viewer.scalebar({
             pixelsPerMeter: mpp ? (1e6 / mpp) : 0,
         });
     }
 
     open_slide("{{ slide_url }}", parseFloat('{{ slide_mpp }}'));
-    $(".load-slide").click(function(ev) {
-        $(".current-slide").removeClass("current-slide");
-        $(this).parent().addClass("current-slide");
-        open_slide($(this).attr('data-url'),
-                parseFloat($(this).attr('data-mpp')));
-        ev.preventDefault();
-    });
+//    $(".load-slide").click(function(ev) {
+//        $(".current-slide").removeClass("current-slide");
+//        $(this).parent().addClass("current-slide");
+//        open_slide($(this).attr('data-url'),
+//                parseFloat($(this).attr('data-mpp')));
+//        ev.preventDefault();
+//    });
 });
+</script>
+<script>
+    $("#toggle-btn").change(function(){
+    if($(this).is(':checked')) {
+        $.post("http://localhost:5000/overlay",
+          {
+            overlay: "on"
+          },
+          function(data, status){
+            alert("Data: " + data + "\nStatus: " + status);
+          });
+    } else {
+        // Checkbox is not checked..
+    }
+});
+  function enable_overlay()
+  {
+      $.post("demo_test_post.asp",
+  {
+    name: "Donald Duck",
+    city: "Duckburg"
+  },
+  function(data, status){
+    alert("Data: " + data + "\nStatus: " + status);
+  });
+    const api_url = "http://localhost:5000/overlay";
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+      if (this.readyState == 4 && this.status == 200) {
+        document.getElementById("data").append(this.responseText);
+      }
+    };
+    xhttp.open("GET", api_url, true);
+    xhttp.send();
+  }
 </script>
