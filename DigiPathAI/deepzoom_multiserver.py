@@ -27,6 +27,7 @@ from openslide.deepzoom import DeepZoomGenerator
 import os
 from optparse import OptionParser
 from threading import Lock
+import json
 
 SLIDE_DIR = '.'
 SLIDE_CACHE_SIZE = 10
@@ -131,12 +132,16 @@ def _get_slide(path):
 def index():
     return render_template('files.html', root_dir=_Directory(app.basedir))
 
+@app.route('/overlay',methods=["POST"])
+def overlay():
+    print("Overlaying")
+    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
 
 @app.route('/<path:path>')
 def slide(path):
     slide = _get_slide(path)
     slide_url = url_for('dzi', path=path)
-    import ipdb;ipdb.set_trace()
+    print(slide_url)
     return render_template('slide-multipane.html', slide_url=slide_url,
             slide_filename=slide.filename, slide_mpp=slide.mpp, root_dir=_Directory(app.basedir) )
 
@@ -148,7 +153,6 @@ def dzi(path):
     resp = make_response(slide.get_dzi(format))
     resp.mimetype = 'application/xml'
     return resp
-
 
 @app.route('/<path:path>_files/<int:level>/<int:col>_<int:row>.<format>')
 def tile(path, level, col, row, format):
