@@ -139,7 +139,7 @@ div#properties dd {
 </div>
 
 <script type="text/javascript" src="static/jquery.js"></script>
-<script type="text/javascript" src="static/openseadragon.js"></script>
+<script type="text/javascript" src="static/openseadragon-latest.js"></script>
 <script type="text/javascript" src="static/openseadragon-scalebar.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
@@ -192,18 +192,11 @@ $(document).ready(function() {
             tile_source = url;
             mask_source = mask_url
         }
-        viewer.open([
-            {
-                tileSource: tile_source,
-                x: 0
-            },
-            {
-                tileSource: mask_source,
-                opacity: .7,
-                x: 0
-            }
-        ]);
-        //viewer.open(mask_source);
+        viewer.open(tile_source);
+        viewer.addTiledImage({
+            tileSource: mask_source,
+            opacity: 0.5,
+        });
         viewer.scalebar({
             pixelsPerMeter: mpp ? (1e6 / mpp) : 0,
         });
