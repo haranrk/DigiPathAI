@@ -146,6 +146,7 @@ div#properties dd {
 <script type="text/javascript" src="static/openseadragon-scalebar.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
+    $("#toggle-button").prop('checked', false); 
     var dzi_data = {{ dzi_data|default('{}')|safe }};
     var viewer = new OpenSeadragon({
         id: "view",
