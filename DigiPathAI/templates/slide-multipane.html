@@ -116,7 +116,10 @@ div#properties dd {
     <div>
         <!-- Rounded switch -->
         <label class="switch">
-          <input id="toggle-btn" type="checkbox">
+        <p>
+            Overlay mask
+          <input id="toggle-btn" type="checkbox" unchecked>
+        </p>
           <span class="slider round"></span>
         </label>
     </div>
@@ -195,8 +198,19 @@ $(document).ready(function() {
         viewer.open(tile_source);
         viewer.addTiledImage({
             tileSource: mask_source,
-            opacity: 0.5,
+            opacity: 0,
         });
+
+        $("#toggle-btn").change(function(){
+            tiledImage = viewer.world.getItemAt(1);
+            if($(this).is(':checked')) {
+                console.log("checked");
+                tiledImage.setOpacity(0.5);
+            } else {
+                tiledImage.setOpacity(0);
+            }
+        });
+
         viewer.scalebar({
             pixelsPerMeter: mpp ? (1e6 / mpp) : 0,
         });
@@ -213,37 +227,4 @@ $(document).ready(function() {
 });
 </script>
 <script>
-    $("#toggle-btn").change(function(){
-    if($(this).is(':checked')) {
-        $.post("http://localhost:5000/overlay",
-          {
-            overlay: "on"
-          },
-          function(data, status){
-            alert("Data: " + data + "\nStatus: " + status);
-          });
-    } else {
-        // Checkbox is not checked..
-    }
-});
-  function enable_overlay()
-  {
-      $.post("demo_test_post.asp",
-  {
-    name: "Donald Duck",
-    city: "Duckburg"
-  },
-  function(data, status){
-    alert("Data: " + data + "\nStatus: " + status);
-  });
-    const api_url = "http://localhost:5000/overlay";
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-      if (this.readyState == 4 && this.status == 200) {
-        document.getElementById("data").append(this.responseText);
-      }
-    };
-    xhttp.open("GET", api_url, true);
-    xhttp.send();
-  }
 </script>
