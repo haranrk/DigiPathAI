@@ -1,149 +1,174 @@
 <!doctype html>
-<meta charset="utf-8">
-<title>Slide Viewer</title>
-<meta name="viewport" content="user-scalable=no">
+<head>
+	<meta charset="utf-8">
+	<title>Slide Viewer</title>
+	<meta name="viewport" content="user-scalable=no">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 
-<style type="text/css">
-html {
-    overflow: hidden;
-}
-body {
-    margin: 5px;
-}
-h1 {
-    font-size: 1.2em;
-}
-.notice {
-    font-style: italic;
-}
-div#images {
-    position: absolute;
-    width: 15%;
-}
-div#images h2 {
-    font-size: 1em;
-    margin: 0;
-}
-.associated-images {
-    margin-left: 1.5em;
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-left: 0;
-}
-div#images li {
-    list-style-type: none;
-}
-.current-slide {
-    background-color: #ccf;
-}
-div#view {
-    position: absolute;
-    left: 16%;
-    width: 58%;
-    height: 98%;
-    background-color: black;
-    border: 1px solid #000;
-    color: white;
-}
-div#view.fullpage {
-    left: 0%;
-    border: 0;
-}
-div#properties {
-    position: absolute;
-    left: 75%;
-    width: 24.5%;
-    height: 98%;
-    overflow: auto;
-}
-div#properties-inner {
-    display: inline-block;
-}
-div#properties dl {
-    font-size: small;
-    margin: 0;
-}
-div#properties dt {
-    font-weight: bold;
-    border-top: 1px solid #000;
-    background-color: #eee;
-}
-div#properties dd {
-    margin-left: 0;
-}
-</style>
+	<style type="text/css">
+		html {
+		    overflow: hidden;
+		}
+		body {
+		    margin: 5px;
+		}
+		h1 {
+		    font-size: 1.2em;
+		}
+		.notice {
+		    font-style: italic;
+		}
+		div#images {
+		    position: absolute;
+		    width: 15%;
+		}
+		div#images h2 {
+		    font-size: 1em;
+		    margin: 0;
+		}
+		.associated-images {
+		    margin-left: 1.5em;
+		    margin-top: 0;
+		    margin-bottom: 0;
+		    padding-left: 0;
+		}
+		div#images li {
+		    list-style-type: none;
+		}
+		.current-slide {
+		    background-color: #ccf;
+		}
+		div#view {
+		    position: absolute;
+		    left: 16%;
+		    width: 58%;
+		    height: 98%;
+		    background-color: black;
+		    border: 1px solid #000;
+		    color: white;
+		}
+		div#view.fullpage {
+		    left: 0%;
+		    border: 0;
+		}
+		div#properties {
+		    position: absolute;
+		    left: 75%;
+		    width: 24.5%;
+		    height: 98%;
+		    overflow: auto;
+		}
+		div#properties-inner {
+		    display: inline-block;
+		}
+		div#properties dl {
+		    font-size: small;
+		    margin: 0;
+		}
+		div#properties dt {
+		    font-weight: bold;
+		    border-top: 1px solid #000;
+		    background-color: #eee;
+		}
+		div#properties dd {
+		    margin-left: 0;
+		}
+	</style>
+</head>
 
-<div id="images">
-    <h1>View</h1>
-    <div class="current-slide">
-        <a class="load-slide" href="#" data-url="{{ slide_url }}"
-                data-mpp="{{ slide_mpp }}">Slide</a>
-    </div>
-    <h2>Associated images</h2>
-    {% if associated %}
-        <ul class="associated-images">
-            {% for name in associated|sort %}
-                <li><a class="load-slide" href="#"
-                        data-url="{{ associated[name] }}">
-                    {{ name }}
-                </a>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <span class="associated-images notice">None</span>
-    {% endif %}
-    <ul>
-        {% for entry in root_dir.children recursive %}
-            <li>
-                {% if entry.url_path %}
-                    <a href="{{ url_for('slide', path=entry.url_path) }}">
-                        {{ entry.name }}
-                    </a>
-                {% else %}
-                    {{ entry.name }}
-                {% endif %}
 
-                {% if entry.children %}
-                    <ul>
-                        {{ loop(entry.children) }}
-                    </ul>
-                {% endif %}
-            </li>
-        {% else %}
-            <li class="none">None</li>
-        {% endfor %}
-    </ul>
-    <div>
-        <!-- Rounded switch -->
-        <label class="switch">
-        <p>
-            Overlay mask
-          <input id="toggle-btn" type="checkbox" unchecked>
-        </p>
-          <span class="slider round"></span>
-        </label>
-    </div>
-</div>
-<div id="view"></div>
-<div id="properties">
-    <h1>Slide properties</h1>
-    {% if properties %}
-        <div id="properties-inner">
-            <dl>
-            {% for name in properties %}
-                <dt>{{ name }}
-                <dd>{{ properties[name] }}
-            {% endfor %}
-            </dl>
-        </div>
-    {% else %}
-        <span class="notice">None</span>
-    {% endif %}
-</div>
+<body>
+	
+	<nav class="navbar navbar-inverse" stype="margin-bottom: 0px; padding-bottom: 0px">
+	  <div class="container-fluid">
+	    <div class="navbar-header">
+	      <a class="navbar-brand" href="#">WebSiteName</a>
+	    </div>
+	    <ul class="nav navbar-nav">
+	      <li class="active"><a href="#">Home</a></li>
+	      <li><a href="#">Page 1</a></li>
+	      <li><a href="#">Page 2</a></li>
+	      <li><a href="#">Page 3</a></li>
+	    </ul>
+	  </div>
+	</nav>
+
+
+	<div id="images" style="padding-top: 0px; margin-top: 0px">
+	    <h1>View</h1>
+	    <div class="current-slide">
+		<a class="load-slide" href="#" data-url="{{ slide_url }}"
+		        data-mpp="{{ slide_mpp }}">Slide</a>
+	    </div>
+	    <h2>Associated images</h2>
+	    {% if associated %}
+		<ul class="associated-images">
+		    {% for name in associated|sort %}
+		        <li><a class="load-slide" href="#"
+		                data-url="{{ associated[name] }}">
+		            {{ name }}
+		        </a>
+		    {% endfor %}
+		</ul>
+	    {% else %}
+		<span class="associated-images notice">None</span>
+	    {% endif %}
+	    <ul>
+		{% for entry in root_dir.children recursive %}
+		    <li>
+		        {% if entry.url_path %}
+		            <a href="{{ url_for('slide', path=entry.url_path) }}">
+		                {{ entry.name }}
+		            </a>
+		        {% else %}
+		            {{ entry.name }}
+		        {% endif %}
+
+		        {% if entry.children %}
+		            <ul>
+		                {{ loop(entry.children) }}
+		            </ul>
+		        {% endif %}
+		    </li>
+		{% else %}
+		    <li class="none">None</li>
+		{% endfor %}
+	    </ul>
+	    <div>
+		<!-- Rounded switch -->
+		<label class="switch">
+		<p>
+		    Overlay mask
+		  <input id="toggle-btn" type="checkbox" unchecked>
+		</p>
+		  <span class="slider round"></span>
+		</label>
+	    </div>
+	</div>
+	<div id="view"></div>
+	<div id="properties">
+	    <h1>Slide properties</h1>
+	    {% if properties %}
+		<div id="properties-inner">
+		    <dl>
+		    {% for name in properties %}
+		        <dt>{{ name }}
+		        <dd>{{ properties[name] }}
+		    {% endfor %}
+		    </dl>
+		</div>
+	    {% else %}
+		<span class="notice">None</span>
+	    {% endif %}
+	</div>
+</body>
 
 <script type="text/javascript" src="static/jquery.js"></script>
 <script type="text/javascript" src="static/openseadragon-latest.js"></script>
 <script type="text/javascript" src="static/openseadragon-scalebar.js"></script>
+<!--<script type="text/javascript" src="static/custom/multiple_img.js"></script>-->
 <script type="text/javascript">
 $(document).ready(function() {
     $("#toggle-button").prop('checked', false); 
@@ -226,6 +251,4 @@ $(document).ready(function() {
 //        ev.preventDefault();
 //    });
 });
-</script>
-<script>
 </script>
