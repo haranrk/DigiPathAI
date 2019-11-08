@@ -102,7 +102,6 @@ div#properties dd {
                 {% else %}
                     {{ entry.name }}
                 {% endif %}
-
                 {% if entry.children %}
                     <ul>
                         {{ loop(entry.children) }}
@@ -114,14 +113,21 @@ div#properties dd {
         {% endfor %}
     </ul>
     <div>
-        <!-- Rounded switch -->
         <label class="switch">
-        <p>
-            Overlay mask
-          <input id="toggle-btn" type="checkbox" unchecked>
-        </p>
-          <span class="slider round"></span>
+            {% if mask_status %}
+                <p>Overlay mask <input id="toggle-btn" type="checkbox"></p>
+            {% else %}
+                <p>Mask not available <input id="toggle-btn" type="checkbox" disabled></p>
+            {% endif %}
         </label>
+    </div>
+    <div>
+        <form>
+            <a href=# ><button id="get-segmentation-btn" class='btn btn-default'>Get segmentation</button></a>
+        </form>
+    </div>
+    <div>
+        <p id="segment-status"></p>
     </div>
 </div>
 <div id="view"></div>
@@ -225,6 +231,23 @@ $(document).ready(function() {
 //                parseFloat($(this).attr('data-mpp')));
 //        ev.preventDefault();
 //    });
+    $('#get-segmentation-btn').bind('click', function() {
+                $.getJSON('/segment',
+                    function(data) {
+                        console.log(data);
+                        $('#get-segmentation-btn').prop('disabled',true);
+                        window.setInterval(function(){
+                            console.log("Checking status");
+                            $.getJSON('/check_segment_status',
+                                function(data){
+                                    console.log(data.status);
+                                    $('#segment-status').text(data.status);
+                            });
+
+                        },2000);
+                });
+                return false;
+              });
 });
 </script>
 <script>

@@ -16,10 +16,18 @@ li.none {
 <ul>
     {% for entry in root_dir.children recursive %}
         <li>
+            <p>
             {% if entry.url_path %}
                 <a href="{{ url_for('slide', path=entry.url_path) }}">
                     {{ entry.name }}
                 </a>
+                 - 
+                {% if entry.mask_present %}
+                    Mask present
+                {% else %}
+                    Mask not present
+                {% endif %}
+            </p>
             {% else %}
                 {{ entry.name }}
             {% endif %}
