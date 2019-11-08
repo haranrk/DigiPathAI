@@ -114,11 +114,18 @@ div#properties dd {
     </ul>
     <div>
         <label class="switch">
+            <p id="overlay-text">
             {% if mask_status %}
-                <p>Overlay mask <input id="toggle-btn" type="checkbox"></p>
+                Overlay mask 
             {% else %}
-                <p>Mask not available <input id="toggle-btn" type="checkbox" disabled></p>
+                Mask not available 
             {% endif %}
+            </p>
+            <input id="toggle-btn" type="checkbox"
+            {% if not mask_status %}
+                disabled 
+            {% endif %}
+            >
         </label>
     </div>
     <div>
@@ -128,6 +135,7 @@ div#properties dd {
     </div>
     <div>
         <p id="segment-status"></p>
+        <p id="segment-progress"></p>
     </div>
 </div>
 <div id="view"></div>
@@ -231,21 +239,31 @@ $(document).ready(function() {
 //                parseFloat($(this).attr('data-mpp')));
 //        ev.preventDefault();
 //    });
+    function update_segment_status(){
+        $.getJSON('/check_segment_status',
+            function(data){
+                console.log(data.status);
+                $('#segment-status').text(data.status);
+                $('#segment-progress').text(data.progress);
+                if(data.status==="Done"){
+                    clearInterval(intervalId);
+                    $('#segment-progress').hide("slow");
+                    $('#overlay-text').text("Overlay mask");
+                    $('#toggle-btn').attr("disabled",false);
+                }
+            });
+    }
+
+    var intervalId;
+
     $('#get-segmentation-btn').bind('click', function() {
                 $.getJSON('/segment',
                     function(data) {
                         console.log(data);
                         $('#get-segmentation-btn').prop('disabled',true);
-                        window.setInterval(function(){
-                            console.log("Checking status");
-                            $.getJSON('/check_segment_status',
-                                function(data){
-                                    console.log(data.status);
-                                    $('#segment-status').text(data.status);
-                            });
-
-                        },2000);
+                        intervalId=setInterval(update_segment_status,2000);
                 });
+                update_segment_status();
                 return false;
               });
 });
