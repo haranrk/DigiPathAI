@@ -157,7 +157,9 @@ def segment():
 def run_segmentation(status):
     status['status'] = "Running"
     print("Starting segmentation")
-    time.sleep(4)
+    for i in range(4):
+        status['progress'] = (1+i)/4 
+        time.sleep(4)
     print("Segmentation done")
     status['status'] = "Done"
 
