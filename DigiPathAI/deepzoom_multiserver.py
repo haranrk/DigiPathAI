@@ -20,6 +20,7 @@
 
 from collections import OrderedDict
 from flask import Flask, abort, make_response, render_template, url_for
+from flask import flash
 from io import BytesIO
 import openslide
 from openslide import OpenSlide, OpenSlideError
@@ -28,6 +29,9 @@ import os
 from optparse import OptionParser
 from threading import Lock
 import json
+import threading
+import time
+from queue import Queue 
 
 SLIDE_DIR = '.'
 SLIDE_CACHE_SIZE = 10
@@ -79,11 +83,11 @@ class _SlideCache(object):
                 self._cache[path] = slide
         return slide
 
-
 class _Directory(object):
     def __init__(self, basedir, relpath=''):
         self.name = os.path.basename(relpath)
         self.children = []
+        self.children_masks = []
         for name in sorted(os.listdir(os.path.join(basedir, relpath))):
             cur_relpath = os.path.join(relpath, name)
             cur_path = os.path.join(basedir, cur_relpath)
@@ -92,14 +96,18 @@ class _Directory(object):
                 if cur_dir.children:
                     self.children.append(cur_dir)
             elif OpenSlide.detect_format(cur_path):
-                self.children.append(_SlideFile(cur_relpath))
-
+                if 'slide' in os.path.basename(cur_path):
+                    #liver-slide-1-slide.tiff -> liver-slide-1-mask.tiff
+                    if mask_exists(cur_path):
+                        self.children.append(_SlideFile(cur_relpath,True))
+                    else:
+                        self.children.append(_SlideFile(cur_relpath,False))
 
 class _SlideFile(object):
-    def __init__(self, relpath):
+    def __init__(self, relpath, mask_present):
         self.name = os.path.basename(relpath)
         self.url_path = relpath
-
+        self.mask_present = mask_present
 
 @app.before_first_request
 def _setup():
@@ -111,7 +119,14 @@ def _setup():
     }
     opts = dict((v, app.config[k]) for k, v in config_map.items())
     app.cache = _SlideCache(app.config['SLIDE_CACHE_SIZE'], opts)
+    app.segmentation_status = {"status":""}
 
+def mask_exists(path):
+    mask_path = '-'.join(path.split('-')[:-1]+["mask"])+'.'+path.split('.')[-1]
+    if os.path.isfile(mask_path):
+        return True
+    else:
+        return False
 
 def _get_slide(path):
     path = os.path.abspath(os.path.join(app.basedir, path))
@@ -127,22 +142,37 @@ def _get_slide(path):
     except OpenSlideError:
         abort(404)
 
-
 @app.route('/')
 def index():
     return render_template('files.html', root_dir=_Directory(app.basedir))
 
-@app.route('/overlay',methods=["POST"])
-def overlay():
-    print("Overlaying")
-    return json.dumps({'success':True}), 200, {'ContentType':'application/json'}
+@app.route('/segment')
+def segment():
+    print("hello")
+    app.segmentation_status = {}
+    x = threading.Thread(target=run_segmentation, args=(app.segmentation_status,))
+    x.start()
+    return {"status":"Nothing"}
+
+def run_segmentation(status):
+    status['status'] = "Running"
+    print("Starting segmentation")
+    time.sleep(4)
+    print("Segmentation done")
+    status['status'] = "Done"
+
+@app.route('/check_segment_status')
+def check_segment_status():
+    return app.segmentation_status
 
 @app.route('/<path:path>')
 def slide(path):
-    slide = _get_slide(path)
+    slide= _get_slide(path)
     slide_url = url_for('dzi', path=path)
+    path = os.path.abspath(os.path.join(app.basedir, path))
+    mask_status = mask_exists(path)
     print(slide_url)
-    return render_template('slide-multipane.html', slide_url=slide_url,
+    return render_template('slide-multipane.html', slide_url=slide_url,mask_status=mask_status,
             slide_filename=slide.filename, slide_mpp=slide.mpp, root_dir=_Directory(app.basedir) )
 
 
