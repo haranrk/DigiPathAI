@@ -7,11 +7,9 @@ import os
 import glob
 import random
 
-import sys
-sys.path.append('..')
-from models.densenet import *
-from models.inception import *
-from models.deeplabv3 import *
+from ..models.densenet import *
+from ..models.inception import *
+from ..models.deeplabv3 import *
 
 import imgaug
 from imgaug import augmenters as iaa
@@ -49,9 +47,9 @@ from skimage.filters import threshold_otsu
 import wget
 
 import numpy as np
-# import pydensecrf.densecrf as dcrf
-# from pydensecrf.utils import unary_from_labels, unary_from_softmax
-# from pydensecrf.utils import compute_unary, create_pairwise_bilateral, create_pairwise_gaussian
+import pydensecrf.densecrf as dcrf
+from pydensecrf.utils import unary_from_labels, unary_from_softmax
+from pydensecrf.utils import compute_unary, create_pairwise_bilateral, create_pairwise_gaussian
 
 from os.path import expanduser
 home = expanduser("~")

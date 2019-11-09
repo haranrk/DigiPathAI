@@ -1,23 +1,5 @@
 #!/usr/bin/env python
 #
-# deepzoom_multiserver - Example web application for viewing multiple slides
-#
-# Copyright (c) 2010-2015 Carnegie Mellon University
-#
-# This library is free software; you can redistribute it and/or modify it
-# under the terms of version 2.1 of the GNU Lesser General Public License
-# as published by the Free Software Foundation.
-#
-# This library is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-# License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with this library; if not, write to the Free Software Foundation,
-# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-#
-
 from collections import OrderedDict
 from flask import Flask, abort, make_response, render_template, url_for
 from flask import flash
@@ -32,7 +14,10 @@ import json
 import threading
 import time
 from queue import Queue 
-from Segmentation import predictImage
+
+import sys
+sys.path.append('..')
+from DigiPathAI.Segmentation import getSegmentation
 
 SLIDE_DIR = '.'
 SLIDE_CACHE_SIZE = 10
@@ -168,7 +153,7 @@ def run_segmentation(status):
     status['status'] = "Running"
     print(status)
     print("Starting segmentation")
-    predictImage(img_path = status['slide_path'],
+    getSegmentation(img_path = status['slide_path'],
                 save_path = get_mask_path(status['slide_path']),
                 status = status)
     time.sleep(0.1)
