@@ -13,7 +13,8 @@ import threading
 import time
 from queue import Queue 
 
-SLIDE_DIR = '.'
+SLIDE_DIR = 'examples'
+VIEWER_ONLY = True
 SLIDE_CACHE_SIZE = 10
 DEEPZOOM_FORMAT = 'jpeg'
 DEEPZOOM_TILE_SIZE = 254
@@ -133,8 +134,8 @@ def index():
 
 @app.route('/segment')
 def segment():
-    if app.viewer_only:
-        app.segmentation_status['status']=app.viewer_only
+    if VIEWER_ONLY:
+        app.segmentation_status['status']=VIEWER_ONLY
     else:
         x = threading.Thread(target=run_segmentation, args=(app.segmentation_status,))
         x.start()
@@ -167,7 +168,7 @@ def slide(path):
     app.segmentation_status['slide_path'] = path
     mask_status = mask_exists(path)
     print(slide_url)
-    return render_template('viewer.html', slide_url=slide_url,mask_status=mask_status, viewer_only=app.viewer_only,
+    return render_template('viewer.html', slide_url=slide_url,mask_status=mask_status, viewer_only=VIEWER_ONLY,
             slide_filename=slide.filename, slide_mpp=slide.mpp, root_dir=_Directory(app.basedir) )
 
 @app.route('/<path:path>.dzi')
@@ -227,9 +228,9 @@ if __name__ == '__main__':
                 help='disable segmentation')
     (opts, args) = parser.parse_args()
     if opts.viewer_only==True:
-        app.viewer_only = True
+        VIEWER_ONLY = True
     else:
-        app.viewer_only = False
+        VIEWER_ONLY = False
 
     if opts.DEBUG == None:
         opts.DEBUG = False
@@ -242,6 +243,7 @@ if __name__ == '__main__':
             delattr(opts, k)
     app.config.from_object(opts)
     # Set slide directory
+    app.config['SLIDE_DIR'] = '.'
     try:
         app.config['SLIDE_DIR'] = args[0]
     except IndexError:
