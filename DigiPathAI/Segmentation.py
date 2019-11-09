@@ -49,6 +49,8 @@ from models.deeplabv3 import *
 from helpers.utils import *
 from loaders.dataloader import *
 
+from os.path import expanduser
+home = expanduser("~")
 
 
 # Random Seeds
@@ -168,13 +170,26 @@ def predictImage(img_path,
 	"""
 	 ['FLIP_LEFT_RIGHT', 'ROTATE_90', 'ROTATE_180', 'ROTATE_270']
 	"""
-	model_path_inception = '/home/pi/Projects/DigiPathAI/model_weights/inception.h5'
-	model_path_deeplabv3 = '/home/pi/Projects/DigiPathAI/model_weights/deeplabv3.h5'
-	model_path_densenet2 = '/home/pi/Projects/DigiPathAI/model_weights/densenet_fold2.h5'
-	model_path_densenet1 = '/home/pi/Projects/DigiPathAI/model_weights/densenet_fold1.h5'
+	
+	path = os.path.join(home, '.DigiPathAI/digestpath_models')
+	if (not os.path.exists(os.path.join(path, 'digestpath_inception.h5'))) or \
+		(not os.path.exists(os.path.join(path, 'digestpath_deeplabv3.h5'))) or \
+		(not os.path.exists(os.path.join(path, 'digestpath_densenet_fold2.h5'))) or \
+		(not os.path.exists(os.path.join(path, 'digestpath_densenet_fold1.h5'))):
+		if status is not None: status['status'] = "Downloading Trained Models"
+		download_digestpath() 
+		model_path_inception = os.path.join(path, 'digestpath_inception.h5')
+		model_path_deeplabv3 = os.path.join(path, 'digestpath_deeplabv3.h5')
+		model_path_densenet2 = os.path.join(path, 'digestpath_densenet_fold2.h5')
+		model_path_densenet1 = os.path.join(path, 'digestpath_densenet_fold1.h5')
+	else :
+		if status is not None: status['status'] = "Found Trained Models, Skipping download"
+		model_path_inception = os.path.join(path, 'digestpath_inception.h5')
+		model_path_deeplabv3 = os.path.join(path, 'digestpath_deeplabv3.h5')
+		model_path_densenet2 = os.path.join(path, 'digestpath_densenet_fold2.h5')
+		model_path_densenet1 = os.path.join(path, 'digestpath_densenet_fold1.h5')
 
-
-
+	if status is not None: status['status'] = "Loading Trained weights"
 	core_config = tf.ConfigProto()
 	core_config.gpu_options.allow_growth = True 
 	session =tf.Session(config=core_config) 
@@ -194,7 +209,8 @@ def predictImage(img_path,
 								models_to_consider[model_name])
 
 	threshold = 0.3
-	
+
+	if status is not None: status['status'] = "Running segmentation"
 	img, probs_map, count_map, tissue_mask, label_mask  = get_prediction(img_path, 
 									mask_path = None, 
 									label_path = None,
