@@ -148,14 +148,13 @@ def index():
 
 @app.route('/segment')
 def segment():
-    print("hello")
-    app.segmentation_status = {}
     x = threading.Thread(target=run_segmentation, args=(app.segmentation_status,))
     x.start()
-    return {"status":"Nothing"}
+    return app.segmentation_status
 
 def run_segmentation(status):
     status['status'] = "Running"
+    print(status)
     print("Starting segmentation")
     for i in range(4):
         status['progress'] = (1+i)/4 
@@ -172,6 +171,7 @@ def slide(path):
     slide= _get_slide(path)
     slide_url = url_for('dzi', path=path)
     path = os.path.abspath(os.path.join(app.basedir, path))
+    app.segmentation_status['slide_path'] = path
     mask_status = mask_exists(path)
     print(slide_url)
     return render_template('slide-multipane.html', slide_url=slide_url,mask_status=mask_status,
