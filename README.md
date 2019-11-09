@@ -1,9 +1,12 @@
 # DigiPathAI
-A software application for viewing [whole slide images (WSI)](https://www.ncbi.nlm.nih.gov/pubmed/30307746) and performing pathological analysis 
+A software application built on top of openslide for viewing [whole slide images (WSI)](https://www.ncbi.nlm.nih.gov/pubmed/30307746) and performing pathological analysis 
 
 # Features
 - Responsive WSI image viewer 
 - State of the art cancer AI pipeline to segment the and display the cancer cell
+
+# Online Demo
+https://digipathai.tech/
 
 # Installation
 ```
