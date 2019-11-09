@@ -19,7 +19,8 @@ import sys
 sys.path.append('..')
 from DigiPathAI.Segmentation import getSegmentation
 
-SLIDE_DIR = '.'
+SLIDE_DIR = 'examples'
+VIEWER_ONLY = True
 SLIDE_CACHE_SIZE = 10
 DEEPZOOM_FORMAT = 'jpeg'
 DEEPZOOM_TILE_SIZE = 254
@@ -108,8 +109,6 @@ def _setup():
     app.cache = _SlideCache(app.config['SLIDE_CACHE_SIZE'], opts)
     app.segmentation_status = {"status":""}
 
-
-
 def mask_exists(path):
     mask_path = '-'.join(path.split('-')[:-1]+["mask"])+'.'+path.split('.')[-1]
     if os.path.isfile(mask_path):
@@ -117,11 +116,9 @@ def mask_exists(path):
     else:
         return False
 
-
 def get_mask_path(path):
     mask_path =  '-'.join(path.split('-')[:-1]+["mask"])+'.'+path.split('.')[-1]
     return mask_path
-
 
 def _get_slide(path):
     path = os.path.abspath(os.path.join(app.basedir, path))
@@ -141,11 +138,13 @@ def _get_slide(path):
 def index():
     return render_template('files.html', root_dir=_Directory(app.basedir))
 
-
 @app.route('/segment')
 def segment():
-    x = threading.Thread(target=run_segmentation, args=(app.segmentation_status,))
-    x.start()
+    if VIEWER_ONLY:
+        app.segmentation_status['status']=VIEWER_ONLY
+    else:
+        x = threading.Thread(target=run_segmentation, args=(app.segmentation_status,))
+        x.start()
     return app.segmentation_status
 
 
@@ -174,9 +173,8 @@ def slide(path):
     app.segmentation_status['slide_path'] = path
     mask_status = mask_exists(path)
     print(slide_url)
-    return render_template('viewer.html', slide_url=slide_url,mask_status=mask_status,
+    return render_template('viewer.html', slide_url=slide_url,mask_status=mask_status, viewer_only=VIEWER_ONLY,
             slide_filename=slide.filename, slide_mpp=slide.mpp, root_dir=_Directory(app.basedir) )
-
 
 @app.route('/<path:path>.dzi')
 def dzi(path):
@@ -240,6 +238,14 @@ def main():
         opts.host = sys.argv[1]
         opts.port = int(sys.argv[2])
 
+    if opts.viewer_only==True:
+        VIEWER_ONLY = True
+    else:
+        VIEWER_ONLY = False
+
+    if opts.DEBUG == None:
+        opts.DEBUG = False
+
     if opts.config is not None:
         app.config.from_pyfile(opts.config)
     # Overwrite only those settings specified on the command line
@@ -247,13 +253,10 @@ def main():
         if not k.startswith('_') and getattr(opts, k) is None:
             delattr(opts, k)
     app.config.from_object(opts)
-    # Set slide directory
-    try:
-        app.config['SLIDE_DIR'] = args[0]
-    except IndexError:
-        pass
 
-    app.run(host=opts.host, port=opts.port,debug=True, threaded=True)
+    # Set slide directory
+    app.config['SLIDE_DIR'] = '.'
+    app.run(host=opts.host, port=opts.port,debug=opts.DEBUG, threaded=True)
 
 if __name__ == "__main__":
     main()
