@@ -1,3 +1,4 @@
+import os
 import setuptools
 
 with open("README.md", "r") as fh:
@@ -23,11 +24,14 @@ setuptools.setup(
          'scikit-image',
          'tensorflow-gpu==1.14',
          'flask',
-         'pydensecrf'
+         'pydensecrf',
+         'openslide-python',
+         'pandas',
+         'wget'
          ],
      entry_points='''
         [console_scripts]
-        digipathai=DigiPathAI.DigiPathAI:main
+        digipathai=DigiPathAI.main_server:main
      ''',
      classifiers=[
          "Programming Language :: Python :: 3.5",
