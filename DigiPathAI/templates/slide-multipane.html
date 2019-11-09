@@ -116,8 +116,8 @@
 	    <h1>View</h1>
             <div class="checkbox">
               <label>
-                  <input type="checkbox" data-toggle="toggle", id="darkSwitch">
-                Dark Mode
+                  <input type="checkbox" data-toggle="toggle", id="darkSwitch" >
+                  Dark Mode
               </label>
             </div>
 
@@ -169,17 +169,8 @@
 
             <div>
                 <label class="switch">
-                    <p id="overlay-text">
-                    {% if mask_status %}
-                        Overlay mask 
-                    {% else %}
-                        Mask not available 
-                    {% endif %}
-                    <input id="toggle-btn" type="checkbox"
-                    {% if not mask_status %}
-                        disabled 
-                    {% endif %}>
-                    </p>
+                    <p id="overlay-text"></p>
+                    <input id="toggle-btn" type="checkbox">
                 </label>
             </div>
 
@@ -216,7 +207,24 @@
 <script src="static/dark-mode-switch.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
-    $("#toggle-button").prop('checked', false); 
+    $("#toggle-btn").prop('checked', false); 
+    function enable_overlay(mask_on){
+        if(mask_on){
+            $("#toggle-btn").prop('disabled', false); 
+            $("#overlay-text").text("Overlay mask");
+        }
+        else{
+            $("#toggle-btn").prop('disabled', true); 
+            $("#overlay-text").text("Mask not available");
+        }
+    }
+
+    {% if mask_status %}
+    enable_overlay(true);
+    {% else %}
+    enable_overlay(false);
+    {% endif %}
+    
     var dzi_data = {{ dzi_data|default('{}')|safe }};
     var viewer = new OpenSeadragon({
         id: "view",
@@ -304,8 +312,7 @@ $(document).ready(function() {
                 if(data.status==="Done"){
                     clearInterval(intervalId);
                     $('#segment-progress').hide("slow");
-                    $('#overlay-text').text("Overlay mask");
-                    $('#toggle-btn').attr("disabled",false);
+                    enable_overlay(true);
                 }
             });
     }
