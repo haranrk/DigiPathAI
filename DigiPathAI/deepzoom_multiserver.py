@@ -109,6 +109,7 @@ class _SlideFile(object):
         self.url_path = relpath
         self.mask_present = mask_present
 
+
 @app.before_first_request
 def _setup():
     app.basedir = os.path.abspath(app.config['SLIDE_DIR'])
