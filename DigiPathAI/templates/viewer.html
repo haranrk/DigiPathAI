@@ -13,10 +13,10 @@
     <div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
         <ul class="navbar-nav mr-auto">
             <li class="nav-item">
-              <a class="nav-link" href="#">About</a>
+                <a class="nav-link" href="{{ url_for('about_info') }}">About</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#">GitHub</a>
+              <a class="nav-link" href="https://github.com/haranrk/DigiPathAI">GitHub</a>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="#">Documentation</a>
@@ -59,7 +59,7 @@
             <p id="segment-status"></p>
             <p id="segment-progress"></p>
         </div>
-	<div class="progress" id="segment-progress" style="display: none">
+        <div class="progress" id="segment-progress" style="display: none">
                 <div class="progress-bar" role="progressbar" style="" aria-valuenow="" aria-valuemin="0" aria-valuemax="100"></div>
         </div>
         <h2>Pathology Images</h2>
