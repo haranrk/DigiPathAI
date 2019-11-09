@@ -4,55 +4,43 @@
 	<title>Slide Viewer</title>
 	<meta name="viewport" content="user-scalable=no">
         <link rel="stylesheet" href="../static/css/bootstrap.min.css">
-        <script src="../static/css/bootstrap.min.js"></script>
-        <link rel="stylesheet" href="../static/dark-mode.css">
         <link rel="stylesheet" href="../static/style.css">
+        <!--<link rel="stylesheet" href="../static/dark-mode.css">-->
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-sm">
-      <ul class="navbar-nav">
-              <a class="navbar-brand" href="#">DigiPathServer</a>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Home</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">About</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="#">Documentation</a>
-        </li>
-      </ul>
+    <nav class="navbar navbar-expand-md navbar-dark ">
+    <div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="#">About</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">GitHub</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#">Documentation</a>
+            </li>
+        </ul>
+    </div>
+    <div class="mx-auto order-0">
+        <a class="navbar-brand mx-auto" href="#">DigiPathAI</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".dual-collapse2">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+    <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
+        <div class="navbar-nav ml-auto">
+          <div class="custom-control custom-switch">
+            <input type="checkbox" class="custom-control-input" id="darkSwitch">
+            <label class="custom-control-label" for="darkSwitch">Dark Mode</label>
+          </div>
+        </div>
+    </div>
     </nav>
-
     <div id="images" style="padding-top: 0px; margin-top: 0px">
         <h1>View</h1>
-        <div class="checkbox">
-          <label>
-              <input type="checkbox" data-toggle="toggle", id="darkSwitch" >
-              Dark Mode
-          </label>
-        </div>
-
-        <!--<div class="current-slide">
-            <a class="load-slide" href="#" data-url="{{ slide_url }}"
-                    data-mpp="{{ slide_mpp }}">Slide</a>
-        </div>-->
-
-
         <h2>Pathology Images</h2>
-        {% if associated %}
-            <ul class="associated-images">
-                {% for name in associated|sort %}
-                    <li><a class="load-slide" href="#"
-                            data-url="{{ associated[name] }}">
-                        {{ name }}
-                    </a>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <span class="associated-images notice">None</span>
-        {% endif %}
         <ul>
             {% for entry in root_dir.children recursive %}
                 <li>
@@ -113,11 +101,12 @@
     </div>
 </body>
 
+<script type="text/javascript" src="../static/dark-mode-switch.min.js"></script>
 <script type="text/javascript" src="../static/jquery-3.4.1.min.js"></script>
 <script type="text/javascript" src="../static/openseadragon-latest.js"></script>
+<script src="../static/css/bootstrap.min.js"></script>
 <script type="text/javascript" src="../static/openseadragon-scalebar.js"></script>
 <!--<script type="text/javascript" src="static/custom/multiple_img.js"></script>-->
-<script src="static/dark-mode-switch.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
     $("#toggle-btn").prop('checked', false); 
