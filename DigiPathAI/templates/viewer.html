@@ -4,8 +4,8 @@
 	<title>Slide Viewer</title>
 	<meta name="viewport" content="user-scalable=no">
         <link rel="stylesheet" href="../static/css/bootstrap.min.css">
-        <link rel="stylesheet" href="../static/dark-mode.css">
-        <link rel="stylesheet" href="../static/style.css">
+        <link rel="stylesheet" href="../static/css/dark-mode.css">
+        <link rel="stylesheet" href="../static/css/style.css">
 </head>
 
 <body class="bg-white">
@@ -39,6 +39,24 @@
     </div>
     </nav>
     <div id="images" style="padding-top: 0px; margin-top: 0px">
+        <div>
+            <div class="custom-control custom-switch">
+                <input type="checkbox" class="custom-control-input" id="toggle-btn">
+                <label class="custom-control-label" for="toggle-btn" id="overlay-text"></label>
+            </div>
+        </div>
+        <div>
+            <form>
+                <a href=# ><button id="get-segmentation-btn" class='btn btn-dark'>Get segmentation</button></a>
+            </form>
+        </div>
+        <div>
+            <p id="segment-status"></p>
+            <p id="segment-progress"></p>
+        </div>
+	<div class="progress" id="segment-progress" style="display: none">
+                <div class="progress-bar" role="progressbar" style="" aria-valuenow="" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
         <h2>Pathology Images</h2>
         <ul>
             {% for entry in root_dir.children recursive %}
@@ -61,28 +79,6 @@
                 <li class="none">None</li>
             {% endfor %}
         </ul>
-        <div>
-            <form>
-                <a href=# ><button id="get-segmentation-btn" class='btn btn-dark'>Get segmentation</button></a>
-            </form>
-        </div>
-	
-        <div>
-            <p id="segment-status"></p>
-            <p id="segment-progress"></p>
-        </div>
-	<div class="progress" id="segment-progress" style="display: none">
-                <div class="progress-bar" role="progressbar" style="" aria-valuenow="" aria-valuemin="0" aria-valuemax="100"></div>
-        </div>
-
-        <div>
-            <div class="custom-control custom-switch">
-                <input type="checkbox" class="custom-control-input" id="toggle-btn">
-                <label class="custom-control-label" for="toggle-btn" id="overlay-text"></label>
-            </div>
-            <!--<p id="overlay-text"></p>-->
-            <!--<input id="toggle-btn" type="checkbox" data-toggle="toggle" data-on="Ready" data-off="Not Ready" data-onstyle="success" data-offstyle="danger">-->
-        </div>
 
 
     </div>
@@ -106,11 +102,11 @@
     </div>
 </body>
 
-<script type="text/javascript" src="../static/jquery-3.4.1.min.js"></script>
-<script type="text/javascript" src="../static/css/bootstrap.min.js"></script>
-<script type="text/javascript" src="../static/dark-mode-switch.js"></script>
-<script type="text/javascript" src="../static/openseadragon-latest.js"></script>
-<script type="text/javascript" src="../static/openseadragon-scalebar.js"></script>
+<script type="text/javascript" src="../static/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="../static/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../static/js/dark-mode-switch.js"></script>
+<script type="text/javascript" src="../static/js/openseadragon-latest.js"></script>
+<script type="text/javascript" src="../static/js/openseadragon-scalebar.js"></script>
 <!--<script type="text/javascript" src="static/custom/multiple_img.js"></script>-->
 <script type="text/javascript">
 $(document).ready(function() {
