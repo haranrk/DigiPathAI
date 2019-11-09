@@ -223,8 +223,8 @@ parser.add_option('-l', '--listen', metavar='ADDRESS', dest='host',
             default='127.0.0.1',
             help='address to listen on [127.0.0.1]')
 parser.add_option('-p', '--port', metavar='PORT', dest='port',
-            type='int', default=5000,
-            help='port to listen on [5000]')
+            type='int', default=8080,
+            help='port to listen on [8080]')
 parser.add_option('-Q', '--quality', metavar='QUALITY',
             dest='DEEPZOOM_TILE_QUALITY', type='int',
             help='JPEG compression quality [75]')
@@ -249,3 +249,6 @@ def main():
         pass
 
     app.run(host=opts.host, port=opts.port,debug=True, threaded=True)
+
+if __name__ == "__main__":
+    main()
