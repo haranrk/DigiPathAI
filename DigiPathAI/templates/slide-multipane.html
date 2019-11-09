@@ -318,8 +318,8 @@ $(document).ready(function() {
                         console.log(data);
                         $('#get-segmentation-btn').prop('disabled',true);
                         intervalId=setInterval(update_segment_status,2000);
+                        update_segment_status();
                 });
-                update_segment_status();
                 return false;
               });
 });
