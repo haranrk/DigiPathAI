@@ -7,7 +7,6 @@
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
         <link rel="stylesheet" href="static/dark-mode.css">
-
 	<style type="text/css">
 		html {
 		    overflow: hidden;
@@ -95,121 +94,114 @@
 	</style>
 </head>
 
-
 <body>
+    <nav class="navbar navbar-inverse" stype="margin-bottom: 0px; padding-bottom: 0px">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">DigiPathServer</a>
+        </div>
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="#">Home</a></li>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Documentation</a></li>
+        </ul>
+      </div>
+    </nav>
+
+
+    <div id="images" style="padding-top: 0px; margin-top: 0px">
+        <h1>View</h1>
+        <div class="checkbox">
+          <label>
+              <input type="checkbox" data-toggle="toggle", id="darkSwitch" >
+              Dark Mode
+          </label>
+        </div>
+
+        <!--<div class="current-slide">
+            <a class="load-slide" href="#" data-url="{{ slide_url }}"
+                    data-mpp="{{ slide_mpp }}">Slide</a>
+        </div>-->
+
+        <h2>Pathology Images</h2>
+        {% if associated %}
+            <ul class="associated-images">
+                {% for name in associated|sort %}
+                    <li><a class="load-slide" href="#"
+                            data-url="{{ associated[name] }}">
+                        {{ name }}
+                    </a>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <span class="associated-images notice">None</span>
+        {% endif %}
+        <ul>
+            {% for entry in root_dir.children recursive %}
+                <li>
+                    {% if entry.url_path %}
+                        <a href="{{ url_for('slide', path=entry.url_path) }}">
+                            {{ entry.name }}
+                        </a>
+                    {% else %}
+                        {{ entry.name }}
+                    {% endif %}
+
+                    {% if entry.children %}
+                        <ul>
+                            {{ loop(entry.children) }}
+                        </ul>
+                    {% endif %}
+                </li>
+            {% else %}
+                <li class="none">None</li>
+            {% endfor %}
+        </ul>
+        <div>
+            <form>
+                <a href=# ><button id="get-segmentation-btn" class='btn btn-dark'>Get segmentation</button></a>
+            </form>
+        </div>
 	
-	<nav class="navbar navbar-inverse" stype="margin-bottom: 0px; padding-bottom: 0px">
-	  <div class="container-fluid">
-	    <div class="navbar-header">
-	      <a class="navbar-brand" href="#">DigiPathServer</a>
-	    </div>
-	    <ul class="nav navbar-nav">
-	      <li class="active"><a href="#">Home</a></li>
-	      <li><a href="#">About</a></li>
-	      <li><a href="#">Documentation</a></li>
-	    </ul>
-	  </div>
-	</nav>
-
-
-	<div id="images" style="padding-top: 0px; margin-top: 0px">
-	    <h1>View</h1>
-            <div class="checkbox">
-              <label>
-                  <input type="checkbox" data-toggle="toggle", id="darkSwitch">
-                Dark Mode
-              </label>
-            </div>
-
-	    <!--<div class="current-slide">
-		<a class="load-slide" href="#" data-url="{{ slide_url }}"
-		        data-mpp="{{ slide_mpp }}">Slide</a>
-            </div>-->
-
-
-	    <h2>Pathology Images</h2>
-	    {% if associated %}
-		<ul class="associated-images">
-		    {% for name in associated|sort %}
-		        <li><a class="load-slide" href="#"
-		                data-url="{{ associated[name] }}">
-		            {{ name }}
-		        </a>
-		    {% endfor %}
-		</ul>
-	    {% else %}
-		<span class="associated-images notice">None</span>
-	    {% endif %}
-	    <ul>
-		{% for entry in root_dir.children recursive %}
-		    <li>
-		        {% if entry.url_path %}
-		            <a href="{{ url_for('slide', path=entry.url_path) }}">
-		                {{ entry.name }}
-		            </a>
-		        {% else %}
-		            {{ entry.name }}
-		        {% endif %}
-
-		        {% if entry.children %}
-		            <ul>
-		                {{ loop(entry.children) }}
-		            </ul>
-		        {% endif %}
-		    </li>
-		{% else %}
-		    <li class="none">None</li>
-		{% endfor %}
-	    </ul>
-            <div>
-                <form>
-                    <a href=# ><button id="get-segmentation-btn" class='btn btn-dark'>Get segmentation</button></a>
-                </form>
-            </div>
-            <br>
-            <div class="progress">
+	<div class="progress">
                 <div>
                     <p id="segment-status"></p>
                     <p id="segment-progress"></p>
                 </div>
                 <div class="progress-bar" role="progressbar" style="" aria-valuenow="" aria-valuemin="0" aria-valuemax="100"></div>
+        </div>
+
+        <div>
+            <label class="switch">
+                <p id="overlay-text"></p>
+                <input id="toggle-btn" type="checkbox">
+            </label>
+        </div>
+
+
+        <div>
+            <p id="segment-status"></p>
+            <p id="segment-progress"></p>
+        </div>
+    </div>
+
+    <div id="view"></div>
+
+    <div id="properties">
+        <h1>Slide properties</h1>
+        {% if properties %}
+            <div id="properties-inner">
+                <dl>
+                {% for name in properties %}
+                    <dt>{{ name }}
+                    <dd>{{ properties[name] }}
+                {% endfor %}
+                </dl>
             </div>
-            <div>
-                <label class="switch">
-                    <p id="overlay-text">
-                    {% if mask_status %}
-                        Overlay mask 
-                    {% else %}
-                        Mask not available 
-                    {% endif %}
-                    <input id="toggle-btn" type="checkbox"
-                    {% if not mask_status %}
-                        disabled 
-                    {% endif %}>
-                    </p>
-                </label>
-            </div>
-
-
-	</div>
-
-	<div id="view"></div>
-
-	<div id="properties">
-	    <h1>Slide properties</h1>
-	    {% if properties %}
-		<div id="properties-inner">
-		    <dl>
-		    {% for name in properties %}
-		        <dt>{{ name }}
-		        <dd>{{ properties[name] }}
-		    {% endfor %}
-		    </dl>
-		</div>
-	    {% else %}
-		<span class="notice">None</span>
-	    {% endif %}
-	</div>
+        {% else %}
+            <span class="notice">None</span>
+        {% endif %}
+    </div>
 </body>
 
 <script type="text/javascript" src="static/jquery.js"></script>
@@ -219,7 +211,24 @@
 <script src="static/dark-mode-switch.min.js"></script>
 <script type="text/javascript">
 $(document).ready(function() {
-    $("#toggle-button").prop('checked', false); 
+    $("#toggle-btn").prop('checked', false); 
+    function enable_overlay(mask_on){
+        if(mask_on){
+            $("#toggle-btn").prop('disabled', false); 
+            $("#overlay-text").text("Overlay mask");
+        }
+        else{
+            $("#toggle-btn").prop('disabled', true); 
+            $("#overlay-text").text("Mask not available");
+        }
+    }
+
+    {% if mask_status %}
+    enable_overlay(true);
+    {% else %}
+    enable_overlay(false);
+    {% endif %}
+    
     var dzi_data = {{ dzi_data|default('{}')|safe }};
     var viewer = new OpenSeadragon({
         id: "view",
@@ -308,8 +317,7 @@ $(document).ready(function() {
                 if(data.status==="Done"){
                     clearInterval(intervalId);
                     $('#segment-progress').hide("slow");
-                    $('#overlay-text').text("Overlay mask");
-                    $('#toggle-btn').attr("disabled",false);
+                    enable_overlay(true);
                 }
             });
     }
