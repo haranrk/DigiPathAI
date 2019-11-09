@@ -9,41 +9,15 @@
 </head>
 
 <body class="bg-white">
-    <nav class="navbar navbar-expand-md navbar-light ">
-    <div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('about_info') }}">About</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="https://github.com/haranrk/DigiPathAI">GitHub</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Documentation</a>
-            </li>
-        </ul>
-    </div>
-    <div class="mx-auto order-0">
-        <a class="navbar-brand mx-auto" href="#">DigiPathAI</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".dual-collapse2">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-    <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
-        <div class="navbar-nav ml-auto">
-          <div class="custom-control custom-switch">
-            <input type="checkbox" class="custom-control-input" id="darkSwitch">
-            <label class="custom-control-label" for="darkSwitch">Dark Mode</label>
-          </div>
-        </div>
-    </div>
-    </nav>
-    <div id="images" style="padding-top: 0px; margin-top: 0px">
-        <div>
+    {% include 'nav.html' %}
+    <div id="images" clas="container" >
+        <div class="row">
+        <div class="col">
             <div class="custom-control custom-switch">
                 <input type="checkbox" class="custom-control-input" id="toggle-btn">
                 <label class="custom-control-label" for="toggle-btn" id="overlay-text"></label>
             </div>
+        </div>
         </div>
         <div>
             {% if viewer_only %}
@@ -62,7 +36,7 @@
         <div class="progress" id="segment-progress" style="display: none">
                 <div class="progress-bar" role="progressbar" style="" aria-valuenow="" aria-valuemin="0" aria-valuemax="100"></div>
         </div>
-        <h2>Pathology Images</h2>
+        <h2>Image List</h2>
         <ul>
             {% for entry in root_dir.children recursive %}
                 <li>

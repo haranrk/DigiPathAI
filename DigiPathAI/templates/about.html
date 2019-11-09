@@ -1,130 +1,77 @@
 <!doctype html>
 <head>
 	<meta charset="utf-8">
-	<title>Slide Viewer</title>
+	<title>About</title>
 	<meta name="viewport" content="user-scalable=no">
         <link rel="stylesheet" href="../static/css/bootstrap.min.css">
-        <link rel="stylesheet" href="../static/css/style.css">
-
+        <!--<link rel="stylesheet" href="../static/css/style.css">-->
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-        <style>
-            .card {
-              box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-              max-width: 300px;
-              margin: auto;
-              text-align: center;
-              font-family: arial;
-            }
-        </style>
         <link rel="stylesheet" href="../static/css/dark-mode.css">
 </head>
 
 <body class="bg-white">
-    <nav class="navbar navbar-expand-md navbar-light ">
-    <div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-              <a class="nav-link" href="#">About</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">GitHub</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Documentation</a>
-            </li>
-        </ul>
-    </div>
-    <div class="mx-auto order-0">
-        <a class="navbar-brand mx-auto" href="#">DigiPathAI</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".dual-collapse2">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-    <div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
-        <div class="navbar-nav ml-auto">
-          <div class="custom-control custom-switch">
-            <input type="checkbox" class="custom-control-input" id="darkSwitch">
-            <label class="custom-control-label" for="darkSwitch">Dark Mode</label>
-          </div>
-        </div>
-    </div>
-    </nav>
-
-    <div class='row'>
-	<p>
-	Evaluation of viable tumor burden is an important step in the assessment of response rates for chemotherapy and it involves segmentation of tissue regions still affected by liver cancer from the  whole slide images (WSIs). Recent developments in deep convolutional neural networks (CNNs) have shown state-of-the-art performance for various medical image analysis problems. In particular, fully convolutional neural networks (FCNs) have been shown to be suitable for performing image segmentation. Due to the large size of WSIs, most of the deep learning methods analyze the WSI by dividing it into small image patches and perform segmentation on each patch independently. Since, the neighboring patches share spatial correlation, the predicted segmentations might be inconsistent at the patch bordering regions. In this paper we propose an ensemble deep learning model for automating the segmentation of viable tumor region from WSIs of liver cancer which effectively addresses the above issues. The proposed approach helps in eliminating false positives and generating consistent segmentation. Post segmentation we propose a methodology for predicting the tumor burden by estimating the whole tumor region by constructing a convex hull around the viable tumor region.
-	</p>
-
-    </div>
-    <h2>Contributors: </h2>
+    {% include 'nav.html' %}
+    <div class="container">
+    <h1>Contributors </h1>
     <br>
     <div class='row'>
-	
         <div class='col-sm-3'>
-            <div class="card">
-	       <div class='row'>
-		<div class='col-sm-6'><img src="../static/images/avinash.png" alt="Avinash" style="width:100%"></div>
-		  <div class='col-sm-6'>
-		      <h1>Avinash Kori</h1>
-		      <p>Final year UG student, IIT Madras</p>
-		      <div >
-			<a href="https://twitter.com/koriavinash001"><i class="fa fa-twitter"></i></a>  
-			<a href="https://www.linkedin.com/in/koriavinash1/"><i class="fa fa-linkedin"></i></a>  
-			<a href="https://koriavinash1.github.io/"><i class="fa fa-user"></i></a>  
-		      </div>
-		  </div>
-		</div>
+            <div class="card bg-light">
+                <img class='card-img-top'src="../static/images/avinash.png" alt="Avinash" style="width:100%">
+                <div class='card-body'>
+                      <h4 class="card-title">Avinash Kori</h4>
+                      <p class="card-text">Final year UG student,<br>IIT Madras</p>
+                      <div >
+                        <a href="https://twitter.com/koriavinash001"><i class="fa fa-twitter"></i></a>  
+                        <a href="https://www.linkedin.com/in/koriavinash1/"><i class="fa fa-linkedin"></i></a>  
+                        <a href="https://koriavinash1.github.io/"><i class="fa fa-user"></i></a>  
+                      </div>
+                </div>
             </div>
         </div>
 	<div class='col-sm-3'>
-            <div class="card">
-	       <div class='row'>
-		<div class='col-sm-6'><img src="../static/images/haran.jpeg" alt="Haran" style="width:100%"></div>
-		  <div class='col-sm-6'>
-		      <h1>Haran Rajkumar</h1>
-		      <p>Final year UG student, IIT Madras</p>
-		      <div >
-			<a href="https://www.linkedin.com/in/haran-rajkumar-a6aa19119/<Paste>"><i class="fa fa-linkedin"></i></a>  
-                	<a href="https://haranrk.me/"><i class="fa fa-user"></i></a>    
-		      </div>
-		  </div>
-		</div>
+            <div class="card bg-light">
+                <img class="card-img-top" src="../static/images/haran.png" alt="Haran" style="width:100%">
+                <div class='card-body'>
+                    <h4 class="card-title">Haran Rajkumar</h4>
+                    <p class="card-text">Final year UG student,<br>IIT Madras</p>
+                    <div>
+                    <a href="https://www.linkedin.com/in/haran-rajkumar-a6aa19119/<Paste>"><i class="fa fa-linkedin"></i></a>  
+                    <a href="https://haranrk.me/"><i class="fa fa-user"></i></a>    
+                    </div>
+                </div>
             </div>
         </div>
 	<div class='col-sm-3'>
-            <div class="card">
-	       <div class='row'>
-		<div class='col-sm-6'>
-		  <img src="../static/images/mahendra.jpeg" alt="mahendra" style="width:100%"></div>
-		  <div class='col-sm-6'>
-              	      <h1>Mahendra Khened</h1>
-                     <p>Research Scholar, IIT Madras</p>
-		      <div >
-			<a href="#"><i class="fa fa-twitter"></i></a>  
-                	<a href="#"><i class="fa fa-linkedin"></i></a>  
-		      </div>
-		  </div>
-		</div>
+            <div class="card bg-light">
+                <img class="card-img-top" src="../static/images/mahendra.jpeg" alt="Haran" style="width:100%">
+                <div class='card-body'>
+                    <h4 class="card-title">Mahendra Khened</h4>
+                    <p class="card-text">Research Scholar,<br>IIT Madras</p>
+                    <div>
+                    <a href=""><i class="fa fa-linkedin"></i></a>  
+                    <a href=""><i class="fa fa-user"></i></a>    
+                    </div>
+                </div>
             </div>
         </div>
 	<div class='col-sm-3'>
-            <div class="card">
-	       <div class='row'>
-		<div class='col-sm-6'>
-		  <img src="../static/images/ganapath.png" alt="ganapathy" style="width:100%"></div>
-		  <div class='col-sm-6'>
-		      <h1>Ganapathy Krishnamurthi</h1>
-              	     <p>Assistant Professor, IIT Madras</p>
-		      <div >
-			<a href="#"><i class="fa fa-twitter"></i></a>  
-                	<a href="#"><i class="fa fa-linkedin"></i></a>    
-		      </div>
-		  </div>
-		</div>
+            <div class="card bg-light">
+                <img class="card-img-top" src="../static/images/ganapath.png" alt="Haran" style="width:100%">
+                <div class='card-body'>
+                    <h4 class="card-title">Prof. Ganapathi K</h4>
+                    <p class="card-text">Assistant Professor,<br>IIT Madras</p>
+                    <div>
+                    <a href=""><i class="fa fa-linkedin"></i></a>  
+                    <a href=""><i class="fa fa-user"></i></a>    
+                    </div>
+                </div>
             </div>
         </div>
 
     </div>
+    </div>
+
 
 </body>
 <script type="text/javascript" src="../static/js/jquery-3.4.1.min.js"></script>

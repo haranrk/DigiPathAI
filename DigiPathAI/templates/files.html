@@ -1,44 +1,58 @@
 <!doctype html>
-<title>Available Slides</title>
+<head>
+    <meta charset="utf-8">
+    <title>Available Slides</title>
+    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
+    <!--<link rel="stylesheet" href="../static/css/style.css">-->
+    <link rel="stylesheet" href="../static/css/dark-mode.css">
+</head>
 
-<style type="text/css">
-li {
-    list-style-type: none;
-    margin: 0.4em 0;
-}
-li.none {
-    font-style: italic;
-}
-</style>
-
-<h1>Available Slides</h1>
-
-<ul>
-    {% for entry in root_dir.children recursive %}
-        <li>
-            <p>
-            {% if entry.url_path %}
-                <a href="{{ url_for('slide', path=entry.url_path) }}">
-                    {{ entry.name }}
-                </a>
-                 - 
-                {% if entry.mask_present %}
-                    Mask present
+<body class="bg-white">
+{% include 'nav.html' %}
+<div class="container">
+    <h1>Available Slides</h1>
+    <br>
+    <table class="table table-sm bg-light table-bordered table-hover">
+        <thead class="">
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Image</th>
+                <th scope="col">Mask Status</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entry in root_dir.children recursive %}
+            <tr>
+                <th scope="row">{{ loop.index }}</th>
+                {% if entry.url_path %}
+                <td>
+                    <a href="{{ url_for('slide', path=entry.url_path) }}">
+                        {{ entry.name }}
+                    </a>
+                </td>
+                 <td>
+                    {% if entry.mask_present %}
+                        Available
+                    {% else %}
+                        Not Available
+                    {% endif %}
+                 </td>
                 {% else %}
-                    Mask not present
+                    {{ entry.name }}
                 {% endif %}
-            </p>
-            {% else %}
-                {{ entry.name }}
-            {% endif %}
 
-            {% if entry.children %}
-                <ul>
-                    {{ loop(entry.children) }}
-                </ul>
-            {% endif %}
-        </li>
-    {% else %}
-        <li class="none">None</li>
-    {% endfor %}
-</ul>
+                {% if entry.children %}
+                    <ul>
+                        {{ loop(entry.children) }}
+                    </ul>
+                {% endif %}
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+</body>
+<script type="text/javascript" src="../static/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="../static/js/popper.min.js"></script>
+<script type="text/javascript" src="../static/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="../static/js/dark-mode-switch.js"></script>

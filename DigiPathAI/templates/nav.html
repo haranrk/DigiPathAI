@@ -1,0 +1,29 @@
+<nav class="navbar navbar-expand-md navbar-light ">
+<div class="navbar-collapse collapse w-100 order-1 order-md-0 dual-collapse2">
+    <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('about_info') }}">About</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('index') }}">Image list</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/haranrk/DigiPathAI/">GitHub</a>
+        </li>
+    </ul>
+</div>
+<div class="mx-auto order-0">
+    <a class="navbar-brand mx-auto" href="#">DigiPathAI</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target=".dual-collapse2">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</div>
+<div class="navbar-collapse collapse w-100 order-3 dual-collapse2">
+    <div class="navbar-nav ml-auto">
+      <div class="custom-control custom-switch">
+        <input type="checkbox" class="custom-control-input" id="darkSwitch">
+        <label class="custom-control-label" for="darkSwitch">Dark Mode</label>
+      </div>
+    </div>
+</div>
+</nav>
