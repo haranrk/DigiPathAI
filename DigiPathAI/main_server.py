@@ -265,7 +265,7 @@ def main():
 
     # Set slide directory
     app.config['SLIDE_DIR'] = '.'
-    app.run(host=opts.host, port=opts.port,debug=opts.DEBUG, threaded=True)
+    app.run(host=opts.host, port=opts.port,debug=True, threaded=True)
 
 if __name__ == "__main__":
     main()
