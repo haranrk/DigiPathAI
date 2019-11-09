@@ -29,10 +29,9 @@ setuptools.setup(
          'pandas',
          'wget'
          ],
-     entry_points='''
-        [console_scripts]
-        digipathai=DigiPathAI.main_server:main
-     ''',
+     entry_points={
+         'console_scripts':['digipathai=DigiPathAI.main_server:main']
+     },
      classifiers=[
          "Programming Language :: Python :: 3.5",
          "License :: OSI Approved :: MIT License",
