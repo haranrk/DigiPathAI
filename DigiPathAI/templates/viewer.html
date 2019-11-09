@@ -11,59 +11,66 @@
 <body class="bg-white">
     {% include 'nav.html' %}
     <div id="images" clas="container" >
-        <div class="row">
+        <br>
         <div class="col">
-            <div class="custom-control custom-switch">
-                <input type="checkbox" class="custom-control-input" id="toggle-btn">
-                <label class="custom-control-label" for="toggle-btn" id="overlay-text"></label>
+            <div class="row">
+                <div class="col">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="toggle-btn">
+                        <label class="custom-control-label" for="toggle-btn" id="overlay-text"></label>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col">
+                    {% if viewer_only %}
+                        <button id="get-segmentation-btn" class='btn btn-dark' disabled>Segmentation Disabled</button>
+                        <p>Server running in viewer only mode</p>
+                    {% else %}
+                    <form>
+                        <a href=# ><button id="get-segmentation-btn" class='btn btn-dark'>Get segmentation</button></a>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <a id="segment-status"></a>
+                    <a id="segment-progress"></a>
+                </div>
+                <div class="progress" id="segment-progress" style="display: none">
+                    <div class="progress-bar" role="progressbar" style="" aria-valuenow="" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col">
+                    <h2>Image List</h2>
+                    <ul>
+                        {% for entry in root_dir.children recursive %}
+                            <li>
+                                {% if entry.url_path %}
+                                    <a href="{{ url_for('slide', path=entry.url_path) }}">
+                                        {{ entry.name }}
+                                    </a>
+                                {% else %}
+                                    {{ entry.name }}
+                                {% endif %}
+
+                                {% if entry.children %}
+                                    <ul>
+                                        {{ loop(entry.children) }}
+                                    </ul>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
             </div>
         </div>
-        </div>
-        <div>
-            {% if viewer_only %}
-                <button id="get-segmentation-btn" class='btn btn-dark' disabled>Segmentation Disabled</button>
-                <p>Server running in viewer only mode</p>
-            {% else %}
-            <form>
-                <a href=# ><button id="get-segmentation-btn" class='btn btn-dark'>Get segmentation</button></a>
-            </form>
-            {% endif %}
-        </div>
-        <div>
-            <p id="segment-status"></p>
-            <p id="segment-progress"></p>
-        </div>
-        <div class="progress" id="segment-progress" style="display: none">
-                <div class="progress-bar" role="progressbar" style="" aria-valuenow="" aria-valuemin="0" aria-valuemax="100"></div>
-        </div>
-        <h2>Image List</h2>
-        <ul>
-            {% for entry in root_dir.children recursive %}
-                <li>
-                    {% if entry.url_path %}
-                        <a href="{{ url_for('slide', path=entry.url_path) }}">
-                            {{ entry.name }}
-                        </a>
-                    {% else %}
-                        {{ entry.name }}
-                    {% endif %}
-
-                    {% if entry.children %}
-                        <ul>
-                            {{ loop(entry.children) }}
-                        </ul>
-                    {% endif %}
-                </li>
-            {% else %}
-                <li class="none">None</li>
-            {% endfor %}
-        </ul>
-
-
     </div>
-
     <div id="view"></div>
-
     <div id="properties">
         <h1>Slide properties</h1>
         {% if properties %}
