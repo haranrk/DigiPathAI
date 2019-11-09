@@ -31,10 +31,10 @@ prediction = getSegmentation(img_path,
 ```
 
 # Results
-![results](./imgs/results_1.png')
+![results](imgs/results_1.png)
 
 # Application Overview
-![demo](./imgs/demo.gif')
+![demo](imgs/demo.gif)
 
 # Requirements
 Just for the viewer 
