@@ -6,9 +6,12 @@ from datetime import datetime
 import os
 import glob
 import random
-from DigestPath.models.densenet import *
-from DigestPath.models.inception import *
-from DigestPath.models.deeplabv3 import *
+
+import sys
+sys.path.append('..')
+from models.densenet import *
+from models.inception import *
+from models.deeplabv3 import *
 
 import imgaug
 from imgaug import augmenters as iaa
@@ -46,9 +49,9 @@ from skimage.filters import threshold_otsu
 
 
 import numpy as np
-import pydensecrf.densecrf as dcrf
-from pydensecrf.utils import unary_from_labels, unary_from_softmax
-from pydensecrf.utils import compute_unary, create_pairwise_bilateral, create_pairwise_gaussian
+# import pydensecrf.densecrf as dcrf
+# from pydensecrf.utils import unary_from_labels, unary_from_softmax
+# from pydensecrf.utils import compute_unary, create_pairwise_bilateral, create_pairwise_gaussian
 
 
 
@@ -303,6 +306,7 @@ def get_mean_img(probs, count_map):
     mean_probs = np.mean(probs, axis=0)
     mean_probs = cv2.morphologyEx(np.array(mean_probs), cv2.MORPH_ERODE, dilate_kernel)
     return mean_probs, np.mean(np.var(probs, axis=0))
+
 
 def BinMorphoProcessMask(mask):
     """
