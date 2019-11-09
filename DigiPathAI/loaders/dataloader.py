@@ -22,7 +22,9 @@ import io
 import itertools
 from six.moves import range
 
-from ..helpers.utils import *
+import sys
+sys.path.append('..')
+from helpers.utils import *
 import time
 import cv2
 from skimage.color import rgb2hsv
