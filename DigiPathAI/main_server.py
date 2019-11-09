@@ -173,8 +173,14 @@ def slide(path):
     app.segmentation_status['slide_path'] = path
     mask_status = mask_exists(path)
     print(slide_url)
+    print(VIEWER_ONLY)
     return render_template('viewer.html', slide_url=slide_url,mask_status=mask_status, viewer_only=VIEWER_ONLY,
             slide_filename=slide.filename, slide_mpp=slide.mpp, root_dir=_Directory(app.basedir) )
+
+
+@app.route('/about')
+def about_info():
+    return render_template('about.html')
 
 @app.route('/<path:path>.dzi')
 def dzi(path):
@@ -234,6 +240,7 @@ parser.add_option('--viewer-only', action='store_true',dest='viewer_only',
 def main():
     (opts, args) = parser.parse_args()
     # Load config file if specified
+    global VIEWER_ONLY
 
     if len(sys.argv) == 3:
         opts.host = sys.argv[1]
@@ -243,6 +250,7 @@ def main():
         VIEWER_ONLY = True
     else:
         VIEWER_ONLY = False
+    print(VIEWER_ONLY)
 
     if opts.DEBUG == None:
         opts.DEBUG = False
