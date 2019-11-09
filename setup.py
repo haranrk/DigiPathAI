@@ -15,21 +15,24 @@ setuptools.setup(
      packages=setuptools.find_packages(),
      package_data={'': ['LICENSE', '*/static/*','*/templates/*' ]},
      install_requires = [
-         'torch',
-         'torchvision',
-         'opencv-python',
-         'imgaug',
-         'tqdm',
-         'matplotlib',
-         'scikit-learn',
-         'scikit-image',
-         'tensorflow-gpu==1.14',
          'flask',
-         'pydensecrf',
          'openslide-python',
-         'pandas',
-         'wget'
          ],
+     extras_require={
+        'gpu': [
+             'torch',
+             'torchvision',
+             'opencv-python',
+             'imgaug',
+             'tqdm',
+             'matplotlib',
+             'scikit-learn',
+             'scikit-image',
+             'tensorflow-gpu>=1.14,<2',
+             'pydensecrf',
+             'pandas',
+             'wget'],
+     },
      entry_points={
          'console_scripts':['digipathai=DigiPathAI.main_server:main']
      },
