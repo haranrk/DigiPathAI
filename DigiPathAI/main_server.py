@@ -174,7 +174,7 @@ def slide(path):
     app.segmentation_status['slide_path'] = path
     mask_status = mask_exists(path)
     print(slide_url)
-    return render_template('slide-multipane.html', slide_url=slide_url,mask_status=mask_status,
+    return render_template('viewer.html', slide_url=slide_url,mask_status=mask_status,
             slide_filename=slide.filename, slide_mpp=slide.mpp, root_dir=_Directory(app.basedir) )
 
 
