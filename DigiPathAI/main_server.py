@@ -226,11 +226,14 @@ if __name__ == '__main__':
     parser.add_option('--viewer-only', action='store_true',dest='viewer_only',
                 help='disable segmentation')
     (opts, args) = parser.parse_args()
-    if opts.viewer_only ==True:
+    if opts.viewer_only==True:
         app.viewer_only = True
     else:
         app.viewer_only = False
-    # Load config file if specified
+
+    if opts.DEBUG == None:
+        opts.DEBUG = False
+
     if opts.config is not None:
         app.config.from_pyfile(opts.config)
     # Overwrite only those settings specified on the command line
@@ -244,4 +247,4 @@ if __name__ == '__main__':
     except IndexError:
         pass
 
-    app.run(host=opts.host, port=opts.port,debug=True, threaded=True)
+    app.run(host=opts.host, port=opts.port,debug=opts.DEBUG, threaded=True)
