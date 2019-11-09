@@ -163,10 +163,9 @@
 	    </ul>
             <div>
                 <form>
-                    <a href=# ><button id="get-segmentation-btn" class='btn btn-dark'>Get segmentation</button></a>
+                    <a href=# ><button id="get-segmentation-btn" class='btn btn-secondary'>Get segmentation</button></a>
                 </form>
             </div>
-
             <div>
                 <label class="switch">
                     <p id="overlay-text">
