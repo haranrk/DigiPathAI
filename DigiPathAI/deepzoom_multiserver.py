@@ -32,6 +32,7 @@ import json
 import threading
 import time
 from queue import Queue 
+from Segmentation import predictImage
 
 SLIDE_DIR = '.'
 SLIDE_CACHE_SIZE = 10
@@ -122,12 +123,20 @@ def _setup():
     app.cache = _SlideCache(app.config['SLIDE_CACHE_SIZE'], opts)
     app.segmentation_status = {"status":""}
 
+
+
 def mask_exists(path):
     mask_path = '-'.join(path.split('-')[:-1]+["mask"])+'.'+path.split('.')[-1]
     if os.path.isfile(mask_path):
         return True
     else:
         return False
+
+
+def get_mask_path(path):
+    mask_path =  '-'.join(path.split('-')[:-1]+["mask"])+'.'+path.split('.')[-1]
+    return mask_path
+
 
 def _get_slide(path):
     path = os.path.abspath(os.path.join(app.basedir, path))
@@ -147,25 +156,30 @@ def _get_slide(path):
 def index():
     return render_template('files.html', root_dir=_Directory(app.basedir))
 
+
 @app.route('/segment')
 def segment():
     x = threading.Thread(target=run_segmentation, args=(app.segmentation_status,))
     x.start()
     return app.segmentation_status
 
+
 def run_segmentation(status):
     status['status'] = "Running"
     print(status)
     print("Starting segmentation")
-    for i in range(4):
-        status['progress'] = (1+i)/4 
-        time.sleep(4)
+    predictImage(img_path = status['slide_path'],
+                save_path = get_mask_path(status['slide_path']),
+                status = status)
+    time.sleep(0.1)
     print("Segmentation done")
     status['status'] = "Done"
+
 
 @app.route('/check_segment_status')
 def check_segment_status():
     return app.segmentation_status
+
 
 @app.route('/<path:path>')
 def slide(path):

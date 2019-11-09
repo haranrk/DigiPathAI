@@ -6,9 +6,12 @@ from datetime import datetime
 import os
 import glob
 import random
-from DigestPath.models.densenet import *
-from DigestPath.models.inception import *
-from DigestPath.models.deeplabv3 import *
+
+import sys
+sys.path.append('..')
+from models.densenet import *
+from models.inception import *
+from models.deeplabv3 import *
 
 import imgaug
 from imgaug import augmenters as iaa
@@ -43,13 +46,32 @@ import time
 import cv2
 from skimage.color import rgb2hsv
 from skimage.filters import threshold_otsu
-
+import wget
 
 import numpy as np
-import pydensecrf.densecrf as dcrf
-from pydensecrf.utils import unary_from_labels, unary_from_softmax
-from pydensecrf.utils import compute_unary, create_pairwise_bilateral, create_pairwise_gaussian
+# import pydensecrf.densecrf as dcrf
+# from pydensecrf.utils import unary_from_labels, unary_from_softmax
+# from pydensecrf.utils import compute_unary, create_pairwise_bilateral, create_pairwise_gaussian
 
+from os.path import expanduser
+home = expanduser("~")
+	
+
+def download_digestpath():
+    """
+        Downloads nobrainer models for transferleraning
+    """
+    model_path = os.path.join(home, '.DigiPathAI/digestpath_models')
+    if (not os.path.exists(model_path)) or (len(os.listdir(model_path)) == 0):
+        os.makedirs(model_path, exist_ok=True)
+        wget.download('https://github.com/haranrk/DigiPathAI/releases/download/models/digestpath_deeplabv3.h5',
+                        out = model_path)
+        wget.download('https://github.com/haranrk/DigiPathAI/releases/download/models/digestpath_densenet_fold1.h5',
+                        out = model_path)
+        wget.download('https://github.com/haranrk/DigiPathAI/releases/download/models/digestpath_densenet_fold2.h5',
+                        out = model_path)
+        wget.download('https://github.com/haranrk/DigiPathAI/releases/download/models/digestpath_inception.h5',
+                        out = model_path)
 
 
 # Image Visualize Helper Functions
@@ -303,6 +325,7 @@ def get_mean_img(probs, count_map):
     mean_probs = np.mean(probs, axis=0)
     mean_probs = cv2.morphologyEx(np.array(mean_probs), cv2.MORPH_ERODE, dilate_kernel)
     return mean_probs, np.mean(np.var(probs, axis=0))
+
 
 def BinMorphoProcessMask(mask):
     """

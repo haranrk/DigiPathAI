@@ -42,13 +42,15 @@ import cv2
 from skimage.color import rgb2hsv
 from skimage.filters import threshold_otsu
 
-from model.densenet import *
-from model.inception import *
-from model.deeplabv3 import *
+from models.densenet import *
+from models.inception import *
+from models.deeplabv3 import *
 
 from helpers.utils import *
 from loaders.dataloader import *
 
+from os.path import expanduser
+home = expanduser("~")
 
 
 # Random Seeds
@@ -70,7 +72,10 @@ def get_prediction(wsi_path,
 				   models=None, 
 				   tta_list=None,
 				   num_workers=8, 
-				   verbose=0):
+				   verbose=0, 
+				   patch_size = 256,
+				   stride_size = 256,
+				   status = None):
 	"""
 	"""
 	dataset_obj = WSIStridedPatchDataset(wsi_path, 
@@ -107,7 +112,11 @@ def get_prediction(wsi_path,
 	for i, model_name in enumerate(models.keys()):
 		probs_map[model_name] = np.zeros(dataloader.dataset._mask.shape)
 
-	for (image_patches, x_coords, y_coords, label_patches) in dataloader:
+	for i, (image_patches, x_coords, y_coords, label_patches) in enumerate(dataloader):
+		
+		if status is not None:
+			status['progress'] = int(i*100.0/ len(dataloader))
+
 
 		image_patches = image_patches.cpu().data.numpy()
 		label_patches = label_patches.cpu().data.numpy()
@@ -152,20 +161,35 @@ def get_prediction(wsi_path,
 def predictImage(img_path, 
 			patch_size  = 256, 
 			stride_size = 128,
-			batch_size  = 64,
-			quick       = False,
+			batch_size  = 32,
+			quick       = True,
 			tta_list    = None,
 			crf         = False,
-			save_path   = '../Results'):
+			save_path   = '../Results',
+			status      = None):
 	"""
 	 ['FLIP_LEFT_RIGHT', 'ROTATE_90', 'ROTATE_180', 'ROTATE_270']
 	"""
-	model_path_inception = '../model_weights/inception.h5'
-	model_path_deeplabv3 = '../model_weights/deeplabv3.h5'
-	model_path_densenet2 = '../model_weights/densenet_fold2.h5'
-	model_path_densenet1 = '../model_weights/densenet_fold1.h5'
+	
+	path = os.path.join(home, '.DigiPathAI/digestpath_models')
+	if (not os.path.exists(os.path.join(path, 'digestpath_inception.h5'))) or \
+		(not os.path.exists(os.path.join(path, 'digestpath_deeplabv3.h5'))) or \
+		(not os.path.exists(os.path.join(path, 'digestpath_densenet_fold2.h5'))) or \
+		(not os.path.exists(os.path.join(path, 'digestpath_densenet_fold1.h5'))):
+		if status is not None: status['status'] = "Downloading Trained Models"
+		download_digestpath() 
+		model_path_inception = os.path.join(path, 'digestpath_inception.h5')
+		model_path_deeplabv3 = os.path.join(path, 'digestpath_deeplabv3.h5')
+		model_path_densenet2 = os.path.join(path, 'digestpath_densenet_fold2.h5')
+		model_path_densenet1 = os.path.join(path, 'digestpath_densenet_fold1.h5')
+	else :
+		if status is not None: status['status'] = "Found Trained Models, Skipping download"
+		model_path_inception = os.path.join(path, 'digestpath_inception.h5')
+		model_path_deeplabv3 = os.path.join(path, 'digestpath_deeplabv3.h5')
+		model_path_densenet2 = os.path.join(path, 'digestpath_densenet_fold2.h5')
+		model_path_densenet1 = os.path.join(path, 'digestpath_densenet_fold1.h5')
 
-
+	if status is not None: status['status'] = "Loading Trained weights"
 	core_config = tf.ConfigProto()
 	core_config.gpu_options.allow_growth = True 
 	session =tf.Session(config=core_config) 
@@ -184,32 +208,37 @@ def predictImage(img_path,
 		models[model_name] = load_trained_models(model_name, 
 								models_to_consider[model_name])
 
-	threshold = 0.5
+	threshold = 0.3
 
-	if not os.path.exists(os.path.join(save_path)):
-		os.makedirs(os.path.join(save_path))
-	
-	img, probs_map, count_map, tissue_mask  = get_prediction(img_path, 
+	if status is not None: status['status'] = "Running segmentation"
+	img, probs_map, count_map, tissue_mask, label_mask  = get_prediction(img_path, 
 									mask_path = None, 
 									label_path = None,
 					  			        batch_size = batch_size,
 									tta_list = tta_list,
-									models = models)
+									models = models,
+									patch_size = patch_size,
+									stride_size = stride_size,
+									status = status)
 	count_map[count_map == 0] = 1
 	for key in probs_map.keys():
 		probs_map[key] = BinMorphoProcessMask(probs_map[key]*(tissue_mask>0).astype('float'))
 			
-	mean_probs = get_mean_img(probs_map.values(), count_map)[..., None]
+	mean_probs, uncertanity = get_mean_img(probs_map.values(), count_map)
+	mean_probs = mean_probs[..., None]
 	
 	if crf:
 		pred = post_process_crf(img, np.concatenate([1-mean_probs, mean_probs], axis = -1) , 2)
-	else 
+	else :
 		pred = mean_probs[:, :, 0] > threshold
-
 	
-	img_name = img_path.split("/")[-1]
-	pred = Image.fromarray(pred.astype('uint8'))
-	pred.save(os.path.join(save_path, img_name))
+	if status is not None:
+		status['progress'] = 100
+	
+
+	pred = Image.fromarray(pred.astype('uint8')*255)
+	pred.save(save_path)
+	os.system('convert ' + save_path + " -compress jpeg -quality 90 -define tiff:tile-geometry=256x256 ptif:"+save_path)
 	return np.array(pred)
 
 
