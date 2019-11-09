@@ -235,6 +235,11 @@ parser.add_option('-s', '--size', metavar='PIXELS',
 def main():
     (opts, args) = parser.parse_args()
     # Load config file if specified
+
+    if len(sys.argv) == 3:
+        opts.host = sys.argv[1]
+        opts.port = int(sys.argv[2])
+
     if opts.config is not None:
         app.config.from_pyfile(opts.config)
     # Overwrite only those settings specified on the command line
