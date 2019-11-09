@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 setuptools.setup(
      name='DigiPathAI',  
-     version='0.0.7',
+     version='0.0.8',
      author="Avinash Kori, Haran Rajkumar",
      author_email="koriavinash1@gmail.com, haranrajkumar97@gmail.com",
      description="Deep Learning toolbox for WSI (digital histopatology) analysis",

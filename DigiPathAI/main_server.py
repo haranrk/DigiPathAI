@@ -229,7 +229,8 @@ parser.add_option('-Q', '--quality', metavar='QUALITY',
 parser.add_option('-s', '--size', metavar='PIXELS',
             dest='DEEPZOOM_TILE_SIZE', type='int',
             help='tile size [254]')
-
+parser.add_option('--viewer-only', action='store_true',dest='viewer_only',
+            help='disable segmentation')
 def main():
     (opts, args) = parser.parse_args()
     # Load config file if specified
