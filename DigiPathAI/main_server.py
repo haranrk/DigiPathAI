@@ -250,7 +250,6 @@ def main():
         VIEWER_ONLY = True
     else:
         VIEWER_ONLY = False
-    print(VIEWER_ONLY)
 
     if opts.DEBUG == None:
         opts.DEBUG = False
@@ -265,7 +264,7 @@ def main():
 
     # Set slide directory
     app.config['SLIDE_DIR'] = '.'
-    app.run(host=opts.host, port=opts.port,debug=True, threaded=True)
+    app.run(host=opts.host, port=opts.port,debug=False, threaded=True)
 
 if __name__ == "__main__":
     main()
