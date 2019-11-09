@@ -46,9 +46,14 @@
             </div>
         </div>
         <div>
+            {% if viewer_only %}
+                <button id="get-segmentation-btn" class='btn btn-dark' disabled>Segmentation Disabled</button>
+                <p>Server running in viewer only mode</p>
+            {% else %}
             <form>
                 <a href=# ><button id="get-segmentation-btn" class='btn btn-dark'>Get segmentation</button></a>
             </form>
+            {% endif %}
         </div>
         <div>
             <p id="segment-status"></p>
@@ -103,6 +108,7 @@
 </body>
 
 <script type="text/javascript" src="../static/js/jquery-3.4.1.min.js"></script>
+<script type="text/javascript" src="../static/js/popper.min.js"></script>
 <script type="text/javascript" src="../static/js/bootstrap.min.js"></script>
 <script type="text/javascript" src="../static/js/dark-mode-switch.js"></script>
 <script type="text/javascript" src="../static/js/openseadragon-latest.js"></script>
@@ -111,6 +117,7 @@
 <script type="text/javascript">
 $(document).ready(function() {
     $("#toggle-btn").prop('checked', false); 
+    $('[data-toggle="tooltip"]').tooltip();
     function enable_overlay(mask_on){
         if(mask_on){
             $("#toggle-btn").prop('disabled', false); 
