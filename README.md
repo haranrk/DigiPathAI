@@ -16,6 +16,6 @@ For the segmentation as well
 
 ## Installation 
 ```
-pip install digipathai
+pip install DigiPathAI
 ```
 
