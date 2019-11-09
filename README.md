@@ -48,15 +48,12 @@ For the segmentation as well
 - `tensorflow<2.0.0`
 - `pytorch`
 
-<<<<<<< HEAD
 ## Installation 
 ```
 pip install DigiPathAI
 pip install DigiPathAI 
 ```
-=======
 # Contact
 - Avinash Kori (koriavinash1@gmail.com)
 - Haran Rajkumar (haranrajkumar97@gmail.com)
->>>>>>> aa12d7556e7c754056a83ecbf991397910951d40
 
