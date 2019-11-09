@@ -22,8 +22,7 @@ import tensorflow as tf
 import pandas as pd
 from tensorflow.keras import backend as K
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import (Input, BatchNormalization, Conv2D, MaxPooling2D,                             						
-					AveragePooling2D, ZeroPadding2D, concatenate, 	
+from tensorflow.keras.layers import (Input, BatchNormalization, Conv2D, MaxPooling2D,                             			    				AveragePooling2D, ZeroPadding2D, concatenate, 	
 					Concatenate, UpSampling2D, Activation, Lambda)
 from tensorflow.keras.losses import categorical_crossentropy
 from tensorflow.keras.optimizers import Adam
@@ -42,12 +41,12 @@ import cv2
 from skimage.color import rgb2hsv
 from skimage.filters import threshold_otsu
 
-from models.densenet import *
-from models.inception import *
-from models.deeplabv3 import *
+from .models.densenet import *
+from .models.inception import *
+from .models.deeplabv3 import *
 
-from helpers.utils import *
-from loaders.dataloader import *
+from .helpers.utils import *
+from .loaders.dataloader import *
 
 from os.path import expanduser
 home = expanduser("~")
@@ -60,9 +59,6 @@ tf.set_random_seed(0)
 
 
 os.environ["CUDA_VISIBLE_DEVICES"] = '0'
-
-
-
 
 # get_prediction
 def get_prediction(wsi_path, 
@@ -77,6 +73,9 @@ def get_prediction(wsi_path,
 				   stride_size = 256,
 				   status = None):
 	"""
+            patch based segmentor
+
+
 	"""
 	dataset_obj = WSIStridedPatchDataset(wsi_path, 
 										mask_path,
@@ -158,7 +157,7 @@ def get_prediction(wsi_path,
 
 
    
-def predictImage(img_path, 
+def getSegmentation(img_path, 
 			patch_size  = 256, 
 			stride_size = 128,
 			batch_size  = 32,
@@ -168,7 +167,23 @@ def predictImage(img_path,
 			save_path   = '../Results',
 			status      = None):
 	"""
-	 ['FLIP_LEFT_RIGHT', 'ROTATE_90', 'ROTATE_180', 'ROTATE_270']
+            args:
+                img_path: WSI tiff image path (str)
+                patch_size: patch size for inference (int)
+                stride_size: stride to skip during segmentation (int)
+                batch_size: batch_size during inference (int)
+                quick: if True; final segmentation is ensemble of 4 different models
+                        else: prediction is of single model (bool)
+                tta_list: type of augmentation required during inference
+                         allowed: ['FLIP_LEFT_RIGHT', 'ROTATE_90', 'ROTATE_180', 'ROTATE_270'] (list(str))
+                crf: application of conditional random fields in post processing step (bool)
+                save_path: path to save final segmentation mask (str)
+                status: required for webserver (json)
+
+            return :
+                saves the prediction in given path (in .tiff format)
+                prediction: predicted segmentation mask
+
 	"""
 	
 	path = os.path.join(home, '.DigiPathAI/digestpath_models')
@@ -240,101 +255,3 @@ def predictImage(img_path,
 	pred.save(save_path)
 	os.system('convert ' + save_path + " -compress jpeg -quality 90 -define tiff:tile-geometry=256x256 ptif:"+save_path)
 	return np.array(pred)
-
-
-if __name__ == "__main__":
-
-	# create session with models
-	model_path_inception = '../model_weights/inception.h5'
-	model_path_deeplabv3 = '../model_weights/deeplabv3.h5'
-	model_path_densenet2 = '../model_weights/densenet_fold2.h5'
-	model_path_densenet1 = '../model_weights/densenet_fold1.h5'
-
-	patch_size = 256
-	stride_size = 128
-	batch_size = 64
-	core_config = tf.ConfigProto()
-	core_config.gpu_options.allow_growth = True 
-	session =tf.Session(config=core_config) 
-	K.set_session(session)
-
-
-	from glob import glob
-	models_to_consider = {'dense1': model_path_densenet1,
-						  'dense2': model_path_densenet2, 
-						  'inception': model_path_inception, 
-						  'deeplabv3': model_path_deeplabv3}
-	models = {}
-	for i, model_name in enumerate(models_to_consider.keys()):
-		models[model_name] = load_trained_models(model_name, 
-												 models_to_consider[model_name])
-
-
-	# all_imgs = glob('/media/'+whoami+'/Kori/histopath/DigestPath2019/Colonoscopy_tissue_segment_dataset/tissue-train-pos/*.jpg')
-	all_imgs = glob('input/*.jpg')
-	all_imgs = [pth for pth in all_imgs if not pth.__contains__('mask')][2:]
-
-	results_root = 'Task2/Results/'
-
-	if not os.path.exists(os.path.join(results_root, 'predictions')):
-		os.makedirs(os.path.join(results_root, 'predictions'))
-
-
-	threshold = 0.5
-	tta_list = None #['ROTATE_90', 'ROTATE_180', 'ROTATE_270'] # ['FLIP_LEFT_RIGHT', 'ROTATE_90', 'ROTATE_180', 'ROTATE_270']
-
-	img_path = []; label = [];
-
-	for img in all_imgs:
-		wsi_path = img
-		label_path = None #img.split('.')[0] + '_mask.jpg'
-		mask_path  = None
-		time_now = time.time()
-		img, probs_map, count_map, tissue_mask, gt = get_prediction(wsi_path, mask_path, 
-														   label_path,
-														   batch_size = batch_size,
-														   tta_list = tta_list,
-														   models = models)
-
-		
-		st = time
-		count_map[count_map == 0] = 1
-		for key in probs_map.keys():
-			probs_map[key] = BinMorphoProcessMask(probs_map[key]*(tissue_mask>0).astype('float'))
-			
-		mean_probs = get_mean_img(probs_map.values(), count_map)[..., None]
-
-		crf = post_process_crf(img, np.concatenate([1-mean_probs, mean_probs], axis = -1) , 2)
-		mean_probs = mean_probs[:, :, 0]
-		tmap = (count_map > 1).astype('float')
-		tbr = np.mean(np.sum(crf)/np.sum(tmap))
-		
-		time_spent = time.time() - time_now
-		print("Time Spent {}".format(time_spent))
-		
-
-
-		for key in probs_map.keys():
-			print (key + ": " + str(iou( probs_map[key]/count_map > threshold, gt.astype('bool'))))
-
-		print ("Mean : " + str(iou( mean_probs > threshold, gt.astype('bool'))))
-		print ("CRF :  " + str(iou( crf > threshold, gt.astype('bool'))))
-		print ("tbr : " + str(tbr))
-
-	
-		if (np.mean(uncertainity) > 0.5*1e-3) and (tbr < 0.005): label.append(0.0)
-		else: label.append(1.0)
-
-		img_name = img.split("/")[-1]
-		img_path.append(img_name)
-
-		crf = Image.fromarray(crf.astype('uint8'))
-		crf.save(os.path.join(results_root, 'predictions', img_name))
-
-		# imshow(count_map, gt, *[t>threshold for t in probs_map.values()], mean_probs>threshold,  crf > threshold)
-
-
-	df = pd.DataFrame()
-	df['image_name'] = img_path
-	df['score'] = label
-	df.to_csv(os.path.join(results_root, 'predict.csv'), index=False)
