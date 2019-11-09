@@ -15,9 +15,6 @@ import threading
 import time
 from queue import Queue 
 
-import sys
-sys.path.append('..')
-from DigiPathAI.Segmentation import getSegmentation
 
 SLIDE_DIR = 'examples'
 VIEWER_ONLY = True
@@ -143,12 +140,15 @@ def segment():
     if VIEWER_ONLY:
         app.segmentation_status['status']=VIEWER_ONLY
     else:
-        x = threading.Thread(target=run_segmentation, args=(app.segmentation_status,))
+        import sys
+        sys.path.append('..')
+        from DigiPathAI.Segmentation import getSegmentation
+        x = threading.Thread(target=run_segmentation, args=(app.segmentation_status,getSegmentation))
         x.start()
     return app.segmentation_status
 
 
-def run_segmentation(status):
+def run_segmentation(status,getSegmentation):
     status['status'] = "Running"
     print(status)
     print("Starting segmentation")
