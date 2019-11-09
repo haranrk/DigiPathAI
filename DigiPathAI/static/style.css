@@ -1,0 +1,83 @@
+html {
+    overflow: hidden;
+}
+body {
+    margin: 5px;
+}
+h1 {
+    font-size: 1.2em;
+}
+.notice {
+    font-style: italic;
+}
+div#images {
+    position: absolute;
+    width: 15%;
+}
+div#images h2 {
+    font-size: 1em;
+    margin: 0;
+}
+.associated-images {
+    margin-left: 1.5em;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+}
+div#images li {
+    list-style-type: none;
+}
+.current-slide {
+    background-color: #ccf;
+}
+div#view {
+    position: absolute;
+    left: 16%;
+    width: 58%;
+    height: 98%;
+    background-color: black;
+    border: 1px solid #000;
+    color: white;
+}
+div#view.fullpage {
+    left: 0%;
+    border: 0;
+}
+div#properties {
+    position: absolute;
+    left: 75%;
+    width: 24.5%;
+    height: 98%;
+    overflow: auto;
+}
+div#properties-inner {
+    display: inline-block;
+}
+div#properties dl {
+    font-size: small;
+    margin: 0;
+}
+div#properties dt {
+    font-weight: bold;
+    border-top: 1px solid #000;
+    background-color: #eee;
+}
+div#properties dd {
+    margin-left: 0;
+}
+[data-theme="dark"] {
+  background-color: #111 !important;
+  color: #eee;
+}
+
+[data-theme="dark"] .bg-light {
+  background-color: #333 !important;
+}
+
+[data-theme="dark"] .bg-white {
+  background-color: #000 !important;
+}
+
+[data-theme="dark"] .bg-black {
+  background-color: #eee !important;
+}
