@@ -114,6 +114,7 @@ def get_prediction(wsi_path,
 		
 		if status is not None:
 			status['progress'] = int(i*100.0/ len(dataloader))
+			print ("========================", status['progress'])
 
 		image_patches = image_patches.cpu().data.numpy()
 		label_patches = label_patches.cpu().data.numpy()
@@ -221,8 +222,8 @@ def predictImage(img_path,
 	
 	img_name = img_path.split("/")[-1]
 	pred = Image.fromarray(pred.astype('uint8'))
-	pred.save(save_path)
-	os.system(save_path+ " -compress jpeg -quality 90 -define tiff:tile-geometry=2738x2847 ptif:"+save_path)
+	pred.save(save_path.replace("tiff", 'jpg'))
+	os.system(save_path.replace("tiff", 'jpg')+ " -compress jpeg -quality 90 -define tiff:tile-geometry=2738x2847 ptif:"+save_path)
 	return np.array(pred)
 
 

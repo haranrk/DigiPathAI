@@ -179,10 +179,6 @@
         </div>
 
 
-        <div>
-            <p id="segment-status"></p>
-            <p id="segment-progress"></p>
-        </div>
     </div>
 
     <div id="view"></div>
@@ -310,7 +306,7 @@ $(document).ready(function() {
     function update_segment_status(){
         $.getJSON('/check_segment_status',
             function(data){
-                console.log(data.status);
+                console.log(data);
                 $('#segment-status').text(data.status);
                 $('#segment-progress').text(data.progress);
                 $('.progress-bar').attr('style', 'width: ' + Number(data.progress) + '%');
