@@ -14,6 +14,7 @@ import json
 import threading
 import time
 from queue import Queue 
+import sys
 
 
 SLIDE_DIR = 'examples'
@@ -140,7 +141,6 @@ def segment():
     if VIEWER_ONLY:
         app.segmentation_status['status']=VIEWER_ONLY
     else:
-        import sys
         sys.path.append('..')
         from DigiPathAI.Segmentation import getSegmentation
         x = threading.Thread(target=run_segmentation, args=(app.segmentation_status,getSegmentation))
