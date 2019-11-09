@@ -114,7 +114,7 @@ def get_prediction(wsi_path,
 		
 		if status is not None:
 			status['progress'] = int(i*100.0/ len(dataloader))
-			print ("========================", status['progress'])
+
 
 		image_patches = image_patches.cpu().data.numpy()
 		label_patches = label_patches.cpu().data.numpy()
@@ -193,10 +193,7 @@ def predictImage(img_path,
 		models[model_name] = load_trained_models(model_name, 
 								models_to_consider[model_name])
 
-	threshold = 0.5
-
-	if not os.path.exists(os.path.join(save_path)):
-		os.makedirs(os.path.join(save_path))
+	threshold = 0.3
 	
 	img, probs_map, count_map, tissue_mask, label_mask  = get_prediction(img_path, 
 									mask_path = None, 
@@ -218,12 +215,14 @@ def predictImage(img_path,
 		pred = post_process_crf(img, np.concatenate([1-mean_probs, mean_probs], axis = -1) , 2)
 	else :
 		pred = mean_probs[:, :, 0] > threshold
-
 	
-	img_name = img_path.split("/")[-1]
-	pred = Image.fromarray(pred.astype('uint8'))
-	pred.save(save_path.replace("tiff", 'jpg'))
-	os.system(save_path.replace("tiff", 'jpg')+ " -compress jpeg -quality 90 -define tiff:tile-geometry=2738x2847 ptif:"+save_path)
+	if status is not None:
+		status['progress'] = 100
+	
+
+	pred = Image.fromarray(pred.astype('uint8')*255)
+	pred.save(save_path)
+	os.system('convert ' + save_path + " -compress jpeg -quality 90 -define tiff:tile-geometry=256x256 ptif:"+save_path)
 	return np.array(pred)
 
 
