@@ -176,6 +176,11 @@ def slide(path):
     return render_template('viewer.html', slide_url=slide_url,mask_status=mask_status, viewer_only=VIEWER_ONLY,
             slide_filename=slide.filename, slide_mpp=slide.mpp, root_dir=_Directory(app.basedir) )
 
+
+@app.route('/about')
+def about_info():
+    return render_template('about.html')
+
 @app.route('/<path:path>.dzi')
 def dzi(path):
     slide = _get_slide(path)
