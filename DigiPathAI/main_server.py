@@ -1,23 +1,3 @@
-#!/usr/bin/env python
-#
-# deepzoom_multiserver - Example web application for viewing multiple slides
-#
-# Copyright (c) 2010-2015 Carnegie Mellon University
-#
-# This library is free software; you can redistribute it and/or modify it
-# under the terms of version 2.1 of the GNU Lesser General Public License
-# as published by the Free Software Foundation.
-#
-# This library is distributed in the hope that it will be useful, but
-# WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-# or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public
-# License for more details.
-#
-# You should have received a copy of the GNU Lesser General Public License
-# along with this library; if not, write to the Free Software Foundation,
-# Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-#
-
 from collections import OrderedDict
 from flask import Flask, abort, make_response, render_template, url_for
 from flask import flash
@@ -32,7 +12,6 @@ import json
 import threading
 import time
 from queue import Queue 
-from Segmentation import predictImage
 
 SLIDE_DIR = '.'
 SLIDE_CACHE_SIZE = 10
@@ -123,8 +102,6 @@ def _setup():
     app.cache = _SlideCache(app.config['SLIDE_CACHE_SIZE'], opts)
     app.segmentation_status = {"status":""}
 
-
-
 def mask_exists(path):
     mask_path = '-'.join(path.split('-')[:-1]+["mask"])+'.'+path.split('.')[-1]
     if os.path.isfile(mask_path):
@@ -132,11 +109,9 @@ def mask_exists(path):
     else:
         return False
 
-
 def get_mask_path(path):
     mask_path =  '-'.join(path.split('-')[:-1]+["mask"])+'.'+path.split('.')[-1]
     return mask_path
-
 
 def _get_slide(path):
     path = os.path.abspath(os.path.join(app.basedir, path))
@@ -156,11 +131,13 @@ def _get_slide(path):
 def index():
     return render_template('files.html', root_dir=_Directory(app.basedir))
 
-
 @app.route('/segment')
 def segment():
-    x = threading.Thread(target=run_segmentation, args=(app.segmentation_status,))
-    x.start()
+    if app.viewer_only:
+        app.segmentation_status['status']=app.viewer_only
+    else:
+        x = threading.Thread(target=run_segmentation, args=(app.segmentation_status,))
+        x.start()
     return app.segmentation_status
 
 
@@ -168,6 +145,7 @@ def run_segmentation(status):
     status['status'] = "Running"
     print(status)
     print("Starting segmentation")
+    from Segmentation import predictImage
     predictImage(img_path = status['slide_path'],
                 save_path = get_mask_path(status['slide_path']),
                 status = status)
@@ -189,9 +167,8 @@ def slide(path):
     app.segmentation_status['slide_path'] = path
     mask_status = mask_exists(path)
     print(slide_url)
-    return render_template('viewer.html', slide_url=slide_url,mask_status=mask_status,
+    return render_template('viewer.html', slide_url=slide_url,mask_status=mask_status, viewer_only=app.viewer_only,
             slide_filename=slide.filename, slide_mpp=slide.mpp, root_dir=_Directory(app.basedir) )
-
 
 @app.route('/<path:path>.dzi')
 def dzi(path):
@@ -218,7 +195,6 @@ def tile(path, level, col, row, format):
     resp = make_response(buf.getvalue())
     resp.mimetype = 'image/%s' % format
     return resp
-
 
 if __name__ == '__main__':
     parser = OptionParser(usage='Usage: %prog [options] [slide-directory]')
@@ -247,8 +223,13 @@ if __name__ == '__main__':
     parser.add_option('-s', '--size', metavar='PIXELS',
                 dest='DEEPZOOM_TILE_SIZE', type='int',
                 help='tile size [254]')
-
+    parser.add_option('--viewer-only', action='store_true',dest='viewer_only',
+                help='disable segmentation')
     (opts, args) = parser.parse_args()
+    if opts.viewer_only ==True:
+        app.viewer_only = True
+    else:
+        app.viewer_only = False
     # Load config file if specified
     if opts.config is not None:
         app.config.from_pyfile(opts.config)
