@@ -1,5 +1,5 @@
 # DigiPathAI
-A software application built on top of openslide for viewing [whole slide images (WSI)](https://www.ncbi.nlm.nih.gov/pubmed/30307746) and performing pathological analysis 
+A software application built on top of [openslide](https://openslide.org/) for viewing [whole slide images (WSI)](https://www.ncbi.nlm.nih.gov/pubmed/30307746) and performing pathological analysis 
 
 # Features
 - Responsive WSI image viewer 
@@ -9,16 +9,49 @@ A software application built on top of openslide for viewing [whole slide images
 https://digipathai.tech/
 
 # Installation
+Running of the AI pipeline requires a GPU and several deep learning modules. However, you can run just the UI as well.
+
+### Just the UI
+#### Requirements
+- `openslide`
+- `flask`
+
+The following command will install only the dependencies listed above.
 ```
 pip install DigiPathAI
 ```
 
-# Usage Local server
+### Entire AI pipeline
+#### Requirements
+- `pytorch`
+- `torchvision`
+- `opencv-python`
+- `imgaug`
+- `matplotlib`
+- `scikit-learn`
+- `scikit-image`
+- `tensorflow-gpu >=1.14,<2`
+- `pydensecrf`
+- `pandas`
+- `wget`
+
+The following command will install the dependencies mentioned
+```
+pip install "DigiPathAI[gpu]"
+```
+
+Both installation methods install the same package, just different dependencies. Even if you had installed using the earlier command, you can install the rest of the dependencies manually. 
+
+
+# Usage 
+## Local server
+Traverse to the directory containing the openslide images and run the following command.
 ```
 digipathai <host: localhost (default)> <port: 8080 (default)>
 ```
 
-# Python API usage
+## Python API usage
+The application also has an API which can be used within python to perform the segmentation. 
 ```
 from DigiPathAI.Segmentation import getSegmentation
 
@@ -33,26 +66,6 @@ prediction = getSegmentation(img_path,
 			status      = None)
 ```
 
-# Results
-![results](imgs/results_1.png)
-
-# Application Overview
-![demo](imgs/demo.gif)
-
-# Requirements
-Just for the viewer 
-- `openslide`
-
-For the segmentation as well
-- `openslide`
-- `tensorflow<2.0.0`
-- `pytorch`
-
-## Installation 
-```
-pip install DigiPathAI
-pip install DigiPathAI 
-```
 # Contact
 - Avinash Kori (koriavinash1@gmail.com)
 - Haran Rajkumar (haranrajkumar97@gmail.com)
