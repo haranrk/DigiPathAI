@@ -11,8 +11,8 @@ https://digipathai.tech/
 # Installation
 Running of the AI pipeline requires a GPU and several deep learning modules. However, you can run just the UI as well.
 
-### Just the UI
-#### Requirements
+## Just the UI
+### Requirements
 - `openslide`
 - `flask`
 
@@ -21,8 +21,8 @@ The following command will install only the dependencies listed above.
 pip install DigiPathAI
 ```
 
-### Entire AI pipeline
-#### Requirements
+## Entire AI pipeline
+### Requirements
 - `pytorch`
 - `torchvision`
 - `opencv-python`
