@@ -5,6 +5,16 @@ A software application built on top of [openslide](https://openslide.org/) for v
 - Responsive WSI image viewer 
 - State of the art cancer AI pipeline to segment the and display the cancer cell
 
+# Application Overview
+<p align="center">
+  <img src="imgs/demo.gif">
+</p>
+
+# Results
+<p align="center">
+  <img width="460" height="300" src="imgs/results_1.png">
+</p>
+
 # Online Demo
 https://digipathai.tech/
 
@@ -41,7 +51,6 @@ pip install "DigiPathAI[gpu]"
 ```
 
 Both installation methods install the same package, just different dependencies. Even if you had installed using the earlier command, you can install the rest of the dependencies manually. 
-
 
 # Usage 
 ## Local server
