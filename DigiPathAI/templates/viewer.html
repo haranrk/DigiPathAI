@@ -10,20 +10,17 @@
 
 <body class="bg-white">
     {% include 'nav.html' %}
-    <div id="images" clas="container" >
+    <div id="images" class="container" >
         <br>
         <div class="col">
             <div class="row">
-                <div class="col">
                     <div class="custom-control custom-switch">
                         <input type="checkbox" class="custom-control-input" id="toggle-btn">
                         <label class="custom-control-label" for="toggle-btn" id="overlay-text"></label>
                     </div>
-                </div>
             </div>
             <br>
             <div class="row">
-                <div class="col">
                     {% if viewer_only %}
                         <button id="get-segmentation-btn" class='btn btn-dark' disabled>Segmentation Disabled</button>
                         <p>Server running in viewer only mode</p>
@@ -32,7 +29,6 @@
                         <a href=# ><button id="get-segmentation-btn" class='btn btn-dark'>Get segmentation</button></a>
                     </form>
                     {% endif %}
-                </div>
             </div>
             <div class="row">
                 <div class="col">
@@ -45,7 +41,6 @@
             </div>
             <br>
             <div class="row">
-                <div class="col">
                     <h2>Image List</h2>
                     <ul>
                         {% for entry in root_dir.children recursive %}
@@ -66,25 +61,28 @@
                             </li>
                         {% endfor %}
                     </ul>
-                </div>
             </div>
         </div>
     </div>
     <div id="view"></div>
-    <div id="properties">
-        <h1>Slide properties</h1>
-        {% if properties %}
-            <div id="properties-inner">
-                <dl>
-                {% for name in properties %}
-                    <dt>{{ name }}
-                    <dd>{{ properties[name] }}
-                {% endfor %}
-                </dl>
+    <div class="container-fluid" id="properties">
+        <div class="col">
+            <h1>Slide properties</h1>
+            <div class="row">
+            {% if properties %}
+                <div id="properties-inner">
+                    <dl>
+                    {% for name in properties %}
+                        <dt>{{ name }}
+                        <dd>{{ properties[name] }}
+                    {% endfor %}
+                    </dl>
+                </div>
+            {% else %}
+                <div class="notice">None</div>
+            {% endif %}
             </div>
-        {% else %}
-            <span class="notice">None</span>
-        {% endif %}
+        </div>
     </div>
 </body>
 
