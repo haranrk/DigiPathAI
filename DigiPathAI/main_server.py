@@ -209,42 +209,39 @@ def tile(path, level, col, row, format):
     return resp
 
 
-parser = OptionParser(usage='Usage: %prog [options] [slide-directory]')
-parser.add_option('-B', '--ignore-bounds', dest='DEEPZOOM_LIMIT_BOUNDS',
-            default=True, action='store_false',
-            help='display entire scan area')
-parser.add_option('-c', '--config', metavar='FILE', dest='config',
-            help='config file')
-parser.add_option('-d', '--debug', dest='DEBUG', action='store_true',
-            help='run in debugging mode (insecure)')
-parser.add_option('-e', '--overlap', metavar='PIXELS',
-            dest='DEEPZOOM_OVERLAP', type='int',
-            help='overlap of adjacent tiles [1]')
-parser.add_option('-f', '--format', metavar='{jpeg|png}',
-            dest='DEEPZOOM_FORMAT',
-            help='image format for tiles [jpeg]')
-parser.add_option('-l', '--listen', metavar='ADDRESS', dest='host',
-            default='127.0.0.1',
-            help='address to listen on [127.0.0.1]')
-parser.add_option('-p', '--port', metavar='PORT', dest='port',
-            type='int', default=8080,
-            help='port to listen on [8080]')
-parser.add_option('-Q', '--quality', metavar='QUALITY',
-            dest='DEEPZOOM_TILE_QUALITY', type='int',
-            help='JPEG compression quality [75]')
-parser.add_option('-s', '--size', metavar='PIXELS',
-            dest='DEEPZOOM_TILE_SIZE', type='int',
-            help='tile size [254]')
-parser.add_option('--viewer-only', action='store_true',dest='viewer_only',
-            help='disable segmentation')
 def main():
+    parser = OptionParser(usage='Usage: %prog [options] [slide-directory]')
+    parser.add_option('-s','--slide_dir',default='.',help="Directory containing the images. Defaults is current directory")
+    parser.add_option('-B', '--ignore-bounds', dest='DEEPZOOM_LIMIT_BOUNDS',
+                default=True, action='store_false',
+                help='display entire scan area')
+    parser.add_option('-c', '--config', metavar='FILE', dest='config',
+                help='config file')
+    parser.add_option('-d', '--debug', dest='DEBUG', action='store_true',
+                help='run in debugging mode (insecure)')
+    parser.add_option('-e', '--overlap', metavar='PIXELS',
+                dest='DEEPZOOM_OVERLAP', type='int',
+                help='overlap of adjacent tiles [1]')
+    parser.add_option('-f', '--format', metavar='{jpeg|png}',
+                dest='DEEPZOOM_FORMAT',
+                help='image format for tiles [jpeg]')
+    parser.add_option('-l', '--listen', metavar='ADDRESS', dest='host',
+                default='127.0.0.1',
+                help='address to listen on [127.0.0.1]')
+    parser.add_option('-p', '--port', metavar='PORT', dest='port',
+                type='int', default=8080,
+                help='port to listen on [8080]')
+    parser.add_option('-Q', '--quality', metavar='QUALITY',
+                dest='DEEPZOOM_TILE_QUALITY', type='int',
+                help='JPEG compression quality [75]')
+    parser.add_option('-S', '--size', metavar='PIXELS',
+                dest='DEEPZOOM_TILE_SIZE', type='int',
+                help='tile size [254]')
+    parser.add_option('--viewer-only', action='store_true',dest='viewer_only',
+                help='disable segmentation')
     (opts, args) = parser.parse_args()
-    # Load config file if specified
-    global VIEWER_ONLY
 
-    if len(sys.argv) == 3:
-        opts.host = sys.argv[1]
-        opts.port = int(sys.argv[2])
+    global VIEWER_ONLY
 
     if opts.viewer_only==True:
         VIEWER_ONLY = True
@@ -254,6 +251,9 @@ def main():
     if opts.DEBUG == None:
         opts.DEBUG = False
 
+    # Set slide directory
+    app.config['SLIDE_DIR'] = opts.slide_dir
+
     if opts.config is not None:
         app.config.from_pyfile(opts.config)
     # Overwrite only those settings specified on the command line
@@ -261,10 +261,7 @@ def main():
         if not k.startswith('_') and getattr(opts, k) is None:
             delattr(opts, k)
     app.config.from_object(opts)
-
-    # Set slide directory
-    app.config['SLIDE_DIR'] = '.'
-    app.run(host=opts.host, port=opts.port,debug=False, threaded=True)
+    app.run(host=opts.host, port=opts.port,debug=opts.DEBUG, threaded=True)
 
 if __name__ == "__main__":
     main()
