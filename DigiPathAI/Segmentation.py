@@ -13,7 +13,6 @@ import random
 import imgaug
 from imgaug import augmenters as iaa
 from PIL import Image
-from tqdm import tqdm
 import matplotlib.pyplot as plt
 
 
