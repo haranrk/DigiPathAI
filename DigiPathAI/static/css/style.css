@@ -10,11 +10,11 @@ h1 {
 .notice {
     font-style: italic;
 }
-div#images {
+div#sidebar {
     position: absolute;
     width: 15%;
 }
-div#images h2 {
+div#sidebar h2 {
     font-size: 1em;
     margin: 0;
 }
@@ -24,7 +24,7 @@ div#images h2 {
     margin-bottom: 0;
     padding-left: 0;
 }
-div#images li {
+div#sidebar li {
     list-style-type: none;
 }
 .current-slide {
@@ -49,19 +49,4 @@ div#properties {
     width: 24.5%;
     height: 98%;
     overflow: auto;
-}
-div#properties-inner {
-    display: inline-block;
-}
-div#properties dl {
-    font-size: small;
-    margin: 0;
-}
-div#properties dt {
-    font-weight: bold;
-    border-top: 1px solid #000;
-    background-color: #eee;
-}
-div#properties dd {
-    margin-left: 0;
 }

@@ -16,7 +16,6 @@ import time
 from queue import Queue 
 import sys
 
-
 SLIDE_DIR = 'examples'
 VIEWER_ONLY = True
 SLIDE_CACHE_SIZE = 10
@@ -30,12 +29,10 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 app.config.from_envvar('DEEPZOOM_MULTISERVER_SETTINGS', silent=True)
 
-
 class PILBytesIO(BytesIO):
     def fileno(self):
         '''Classic PIL doesn't understand io.UnsupportedOperation.'''
         raise AttributeError('Not supported')
-
 
 class _SlideCache(object):
     def __init__(self, cache_size, dz_opts):
@@ -93,7 +90,6 @@ class _SlideFile(object):
         self.name = os.path.basename(relpath)
         self.url_path = relpath
         self.mask_present = mask_present
-
 
 @app.before_first_request
 def _setup():
@@ -164,6 +160,20 @@ def run_segmentation(status,getSegmentation):
 def check_segment_status():
     return app.segmentation_status
 
+def get_slide_properties(slide_path):
+    '''
+    Calculates and returns slide properties as a dictionary
+    '''
+    slide_dims = OpenSlide(slide_path).dimensions
+    properties={'Dimensions':'%d x %d pixel' %(slide_dims[1],slide_dims[0]) }
+    slide_area = slide_dims[0]*slide_dims[1]
+    if (slide_area/1e6) != 0:
+        properties['Area']='%d million pixels' % int(slide_dims[1]*slide_dims[0]/1e6) 
+    elif (slide_area/1e3) != 0:
+        properties['Area']='%d thousand pixels' % int(slide_dims[1]*slide_dims[0]/1e4)
+    else:
+        properties['Area']='%d pixels' % int(slide_dims[1]*slide_dims[0])
+    return properties
 
 @app.route('/<path:path>')
 def slide(path):
@@ -171,10 +181,11 @@ def slide(path):
     slide_url = url_for('dzi', path=path)
     path = os.path.abspath(os.path.join(app.basedir, path))
     app.segmentation_status['slide_path'] = path
+    properties = get_slide_properties(path)
     mask_status = mask_exists(path)
     print(slide_url)
     print(VIEWER_ONLY)
-    return render_template('viewer.html', slide_url=slide_url,mask_status=mask_status, viewer_only=VIEWER_ONLY,
+    return render_template('viewer.html', slide_url=slide_url,mask_status=mask_status, viewer_only=VIEWER_ONLY,properties=properties,
             slide_filename=slide.filename, slide_mpp=slide.mpp, root_dir=_Directory(app.basedir) )
 
 

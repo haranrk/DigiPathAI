@@ -10,7 +10,7 @@
 
 <body class="bg-white">
     {% include 'nav.html' %}
-    <div id="images" class="container" >
+    <div id="sidebar" class="container" >
         <br>
         <div class="col">
             <div class="row">
@@ -65,19 +65,20 @@
         </div>
     </div>
     <div id="view"></div>
-    <div class="container-fluid" id="properties">
+    <div class="container" id="properties">
         <div class="col">
+            <div class="row">
             <h1>Slide properties</h1>
+            </div>
             <div class="row">
             {% if properties %}
-                <div id="properties-inner">
-                    <dl>
+                <ul>
                     {% for name in properties %}
-                        <dt>{{ name }}
-                        <dd>{{ properties[name] }}
+                    <li>
+                        <p><b>{{ name }}</b>: {{ properties[name] }}</p>
+                    </li>
                     {% endfor %}
-                    </dl>
-                </div>
+                </ul>
             {% else %}
                 <div class="notice">None</div>
             {% endif %}
