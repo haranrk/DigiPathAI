@@ -14,3 +14,10 @@
 [data-theme="dark"] .bg-black {
   background-color: #eee !important;
 }
+
+[data-theme="dark"] div#properties dt {
+    font-weight: bold;
+    border-top: 1px solid #eeeeee;
+    background-color: #343a40;
+    color: #FFFFFF;
+}
