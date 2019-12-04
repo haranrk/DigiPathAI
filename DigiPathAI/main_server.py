@@ -138,7 +138,7 @@ def segment():
         app.segmentation_status['status']=VIEWER_ONLY
     else:
         sys.path.append('..')
-        from DigiPathAI.Segmentation import getSegmentation
+        from DigiPathAI.segmentation import getSegmentation
         x = threading.Thread(target=run_segmentation, args=(app.segmentation_status,getSegmentation))
         x.start()
     return app.segmentation_status
