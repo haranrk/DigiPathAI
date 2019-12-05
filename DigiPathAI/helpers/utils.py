@@ -39,7 +39,7 @@ import io
 import itertools
 from six.moves import range
 
-
+import openslide
 import time
 import cv2
 from skimage.color import rgb2hsv
@@ -50,7 +50,6 @@ import numpy as np
 import pydensecrf.densecrf as dcrf
 from pydensecrf.utils import unary_from_labels, unary_from_softmax
 from pydensecrf.utils import compute_unary, create_pairwise_bilateral, create_pairwise_gaussian
-
 from os.path import expanduser
 home = expanduser("~")
 	
@@ -104,6 +103,39 @@ def imshow(*args,**kwargs):
     plt.show()
 
     
+
+# Image Helper Functions
+def imsave(*args, **kwargs):
+     """
+     Concatenate the images given in args and saves them as a single image in the specified output destination.
+     Images should be numpy arrays and have same dimensions along the 0 axis.
+     imsave(im1,im2,out="sample.png")
+     """
+     args_list = list(args)
+     for i in range(len(args_list)):
+         if type(args_list[i]) != np.ndarray:
+             print("Not a numpy array")
+             return 0
+         if len(args_list[i].shape) == 2:
+             args_list[i] = np.dstack([args_list[i]]*3)
+             if args_list[i].max() == 1:
+                args_list[i] = args_list[i]*255
+
+     out_destination = kwargs.get("out",'')
+     try:
+         concatenated_arr = np.concatenate(args_list,axis=1)
+         im = Image.fromarray(np.uint8(concatenated_arr))
+     except Exception as e:
+         print(e)
+         import ipdb; ipdb.set_trace()
+         return 0
+     if out_destination:
+         print("Saving to %s"%(out_destination))
+         im.save(out_destination)
+     else:
+        return im
+
+
 def normalize_minmax(data):
     """
     Normalize contrast across volume
@@ -136,6 +168,24 @@ def BinMorphoProcessMask(mask):
     open_kernel = np.ones((5, 5), dtype=np.uint8)
     image_open = cv2.morphologyEx(np.array(image_close), cv2.MORPH_OPEN, open_kernel)
     return image_open 
+
+
+def BinMorphoProcessMaskOS(mask, level):
+    """
+    Binary operation performed on tissue mask
+    """
+    close_kernel = np.ones((20, 20), dtype=np.uint8)
+    image_close = cv2.morphologyEx(np.array(mask), cv2.MORPH_CLOSE, close_kernel)
+    open_kernel = np.ones((5, 5), dtype=np.uint8)
+    image_open = cv2.morphologyEx(np.array(image_close), cv2.MORPH_OPEN, open_kernel)
+    if level == 2:
+        kernel = np.ones((60, 60), dtype=np.uint8)
+    elif level == 3:
+        kernel = np.ones((35, 35), dtype=np.uint8)
+    else:
+        raise ValueError
+    image = cv2.dilate(image_open,kernel,iterations = 1)
+    return image
 
 def get_bbox(cont_img, rgb_image=None):
     contours, _ = cv2.findContours(cont_img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
@@ -251,6 +301,59 @@ def TissueMaskGeneration(slide_obj, RGB_min=50):
     tissue_mask = tissue_S & tissue_RGB & min_R & min_G & min_B
     return tissue_mask
 
+
+def TissueMaskGenerationOS(slide_obj, level, RGB_min=50):
+    img_RGB = slide_obj.read_region((0, 0),level,slide_obj.level_dimensions[level])
+    img_RGB = np.transpose(np.array(img_RGB.convert('RGB')),axes=[1,0,2])
+    img_HSV = rgb2hsv(img_RGB)
+    background_R = img_RGB[:, :, 0] > threshold_otsu(img_RGB[:, :, 0])
+    background_G = img_RGB[:, :, 1] > threshold_otsu(img_RGB[:, :, 1])
+    background_B = img_RGB[:, :, 2] > threshold_otsu(img_RGB[:, :, 2])
+    tissue_RGB = np.logical_not(background_R & background_G & background_B)
+    tissue_S = img_HSV[:, :, 1] > threshold_otsu(img_HSV[:, :, 1])
+    min_R = img_RGB[:, :, 0] > RGB_min
+    min_G = img_RGB[:, :, 1] > RGB_min
+    min_B = img_RGB[:, :, 2] > RGB_min
+
+    tissue_mask = tissue_S & tissue_RGB & min_R & min_G & min_B
+    # r = img_RGB[:,:,0] < 235
+    # g = img_RGB[:,:,1] < 210
+    # b = img_RGB[:,:,2] < 235
+    # tissue_mask = np.logical_or(r,np.logical_or(g,b))
+    return tissue_mask 
+
+    
+def TissueMaskGeneration_BINOS(slide_obj, level):
+    img_RGB = np.transpose(np.array(slide_obj.read_region((0, 0),
+                       level,
+                       slide_obj.level_dimensions[level]).convert('RGB')),
+                       axes=[1, 0, 2])    
+    img_HSV = cv2.cvtColor(img_RGB, cv2.COLOR_BGR2HSV)
+    img_S = img_HSV[:, :, 1]
+    _,tissue_mask = cv2.threshold(img_S, 0, 255, cv2.THRESH_BINARY)
+    return np.array(tissue_mask)
+
+def TissueMaskGeneration_BIN_OTSUOS(slide_obj, level):
+    img_RGB = np.transpose(np.array(slide_obj.read_region((0, 0),
+                       level,
+                       slide_obj.level_dimensions[level]).convert('RGB')),
+                       axes=[1, 0, 2])    
+    img_HSV = cv2.cvtColor(img_RGB, cv2.COLOR_BGR2HSV)
+    img_S = img_HSV[:, :, 1]
+    _,tissue_mask = cv2.threshold(img_S, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    return np.array(tissue_mask)
+
+def TissueMaskGenerationPatch(patchRGB):
+    '''
+    Returns mask of tissue that obeys the threshold set by paip
+    '''
+    r = patchRGB[:,:,0] < 235
+    g = patchRGB[:,:,1] < 210
+    b = patchRGB[:,:,2] < 235
+    tissue_mask = np.logical_or(r,np.logical_or(g,b))
+    return tissue_mask 
+    
+
 def TissueMaskGeneration_BIN(slide_obj, level):
     img_RGB = np.transpose(np.array(slide_obj.read_region((0, 0),
                        level,
@@ -271,11 +374,19 @@ def TissueMaskGeneration_BIN_OTSU(slide_obj, level):
     _,tissue_mask = cv2.threshold(img_S, 0, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     return np.array(tissue_mask)
 
-def labelthreshold(image, threshold=0.9):
+def labelthreshold(image, threshold=0.5):
     label = np.zeros_like(image)
     label[image >= threshold] = 1
     return label
 
+
+def calc_jacc_score(x,y,smoothing=1):
+    for var in [x,y]:
+        np.place(var,var==255,1)
+    
+    numerator = np.sum(x*y)
+    denominator = np.sum(np.logical_or(x,y))
+    return (numerator+smoothing)/(denominator+smoothing)
 
 # In[9]:
 
@@ -314,14 +425,14 @@ def load_trained_models(model, path, patch_size=256):
 def get_mean_img(probs, count_map):
    
     temp = []
-    dilate_kernel = np.ones((5, 5), dtype=np.uint8)
+    # dilate_kernel = np.ones((5, 5), dtype=np.uint8)
     for ii in probs:
-        ii = cv2.morphologyEx(np.array(ii), cv2.MORPH_DILATE, dilate_kernel).astype('float')
+        # ii = cv2.morphologyEx(np.array(ii), cv2.MORPH_DILATE, dilate_kernel).astype('float')
         temp.append(ii/count_map.astype('float'))
         
     probs = np.array(temp)
     mean_probs = np.mean(probs, axis=0)
-    mean_probs = cv2.morphologyEx(np.array(mean_probs), cv2.MORPH_ERODE, dilate_kernel)
+    # mean_probs = cv2.morphologyEx(np.array(mean_probs), cv2.MORPH_ERODE, dilate_kernel)
     return mean_probs, np.mean(np.var(probs, axis=0))
 
 
