@@ -579,7 +579,7 @@ def getSegmentation(img_path,
     mask_path = None
     start_time = time.time()
     dataset_obj = WSIStridedPatchDataset(wsi_path, 
-                                        mask_path,
+                                        mask_path=None,
                                         label_path=None,
                                         image_size=patch_size,
                                         normalize=True,
