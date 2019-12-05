@@ -21,8 +21,7 @@ import tensorflow as tf
 import pandas as pd
 from tensorflow.keras import backend as K
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import (Input, BatchNormalization, Conv2D, MaxPooling2D,                             			    				AveragePooling2D, ZeroPadding2D, concatenate, 	
-					Concatenate, UpSampling2D, Activation, Lambda)
+from tensorflow.keras.layers import Input, BatchNormalization, Conv2D, MaxPooling2D,AveragePooling2D, ZeroPadding2D, concatenate,Concatenate, UpSampling2D, Activation, Lambda
 from tensorflow.keras.losses import categorical_crossentropy
 from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import ModelCheckpoint, LearningRateScheduler, TensorBoard
@@ -37,6 +36,8 @@ from six.moves import range
 
 import time
 import cv2
+import tifffile 
+
 from skimage.color import rgb2hsv
 from skimage.filters import threshold_otsu
 
@@ -73,8 +74,6 @@ def get_prediction(wsi_path,
 				   status = None):
 	"""
             patch based segmentor
-
-
 	"""
 	dataset_obj = WSIStridedPatchDataset(wsi_path, 
 										mask_path,
@@ -86,6 +85,8 @@ def get_prediction(wsi_path,
 
 
 	dataloader = DataLoader(dataset_obj, batch_size=batch_size, num_workers=num_workers, drop_last=True)
+	dataset_obj.save_scaled_imgs()
+
 	print (dataloader.dataset.__len__(), dataloader.__len__())
 	
 	if tta_list == None:
@@ -95,20 +96,20 @@ def get_prediction(wsi_path,
 		tta_list = np.concatenate([np.array(['DEFAULT']), tta_list])
 		
 	probs_map = {}
-	count_map = np.zeros(dataloader.dataset._mask.shape)
+	count_map = np.zeros(dataloader.dataset._slide.level_dimensions[0])
 	
 	eps = 0.0001
 	num_batch  = len(dataloader)
 	batch_size = dataloader.batch_size
-	map_x_size = dataloader.dataset._mask.shape[0]
-	map_y_size = dataloader.dataset._mask.shape[1]
+	map_x_size = dataloader.dataset._slide.level_dimensions[0][0]
+	map_y_size = dataloader.dataset._slide.level_dimensions[0][1]
 	factor = dataloader.dataset._sampling_stride
 	flip   = dataloader.dataset._flip
 	rotate = dataloader.dataset._rotate 
 		
 	
 	for i, model_name in enumerate(models.keys()):
-		probs_map[model_name] = np.zeros(dataloader.dataset._mask.shape)
+		probs_map[model_name] = np.zeros(dataloader.dataset._slide.level_dimensions[0])
 
 	for i, (image_patches, x_coords, y_coords, label_patches) in enumerate(dataloader):
 		
@@ -130,15 +131,17 @@ def get_prediction(wsi_path,
 													   batch_size=batch_size, 
 													   verbose=verbose, steps=None)
 				for i in range(batch_size):
-					prediction_trans = transform_prob(prediction[i], tta_)/(1.*len(tta_list))
-					shape = prediction_trans.shape
-					probs_map[model_name][x_coords[i]-shape[0]//2: x_coords[i]+shape[0]//2 , 
-						  y_coords[i]-shape[1]//2: y_coords[i]+shape[1]//2]  += prediction_trans[:,:,1]
- 
-					if j == 0:
-						count_map[x_coords[i]-shape[0]//2: x_coords[i]+shape[0]//2, 
-								 y_coords[i]-shape[1]//2: y_coords[i]+shape[1]//2] += np.ones_like(prediction[0,: ,:,1])
+					try: 
+						prediction_trans = transform_prob(prediction[i], tta_)/(1.*len(tta_list))
+						shape = prediction_trans.shape
 
+						probs_map[model_name][x_coords[i]-shape[0]//2: x_coords[i]+shape[0]//2 , 
+								y_coords[i]-shape[1]//2: y_coords[i]+shape[1]//2]  += prediction_trans[:,:,1]
+
+						if j == 0:
+							count_map[x_coords[i]-shape[0]//2: x_coords[i]+shape[0]//2, 
+									 y_coords[i]-shape[1]//2: y_coords[i]+shape[1]//2] += np.ones_like(prediction[0,: ,:,1])
+					except: continue
 	
 	if label_path:
 		return (dataset_obj.get_image(),
@@ -235,8 +238,8 @@ def getSegmentation(img_path,
 									stride_size = stride_size,
 									status = status)
 	count_map[count_map == 0] = 1
-	for key in probs_map.keys():
-		probs_map[key] = BinMorphoProcessMask(probs_map[key]*(tissue_mask>0).astype('float'))
+	# for key in probs_map.keys():
+	# 	probs_map[key] = BinMorphoProcessMask(probs_map[key])
 			
 	mean_probs, uncertanity = get_mean_img(probs_map.values(), count_map)
 	mean_probs = mean_probs[..., None]
@@ -249,8 +252,9 @@ def getSegmentation(img_path,
 	if status is not None:
 		status['progress'] = 100
 	
-
-	pred = Image.fromarray(pred.astype('uint8')*255)
-	pred.save(save_path)
+	status['status'] = "Saving Prediction ..."
+	tifffile.imsave(save_path, pred.astype('uint8')*255, compress=9)
+	# pred = Image.fromarray(pred.astype('uint8')*255)
+	# pred.save(save_path)
 	os.system('convert ' + save_path + " -compress jpeg -quality 90 -define tiff:tile-geometry=256x256 ptif:"+save_path)
 	return np.array(pred)

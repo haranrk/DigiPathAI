@@ -1,6 +1,5 @@
 dgai
 *.DS_STORE
-*.svs
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

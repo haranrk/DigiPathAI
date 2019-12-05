@@ -24,6 +24,7 @@ setuptools.setup(
              'torchvision',
              'opencv-python',
              'imgaug',
+             'tifffile',
              'tqdm',
              'matplotlib',
              'scikit-learn',
