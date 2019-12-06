@@ -15,6 +15,7 @@ import threading
 import time
 from queue import Queue 
 import sys
+from flask import request
 
 SLIDE_DIR = 'examples'
 VIEWER_ONLY = True
@@ -132,25 +133,27 @@ def _get_slide(path):
 def index():
     return render_template('files.html', root_dir=_Directory(app.basedir))
 
-@app.route('/segment')
+@app.route('/segment', methods=['POST'])
 def segment():
+    app.segmentation_status['tissuetype'] = request.form['tissuetype']
     if VIEWER_ONLY:
-        app.segmentation_status['status']=VIEWER_ONLY
+        app.segmentation_status['status'] = VIEWER_ONLY
     else:
         sys.path.append('..')
         from DigiPathAI.Segmentation import getSegmentation
-        x = threading.Thread(target=run_segmentation, args=(app.segmentation_status, getSegmentation))
+        x = threading.Thread(target = run_segmentation, args = (app.segmentation_status, getSegmentation))
         x.start()
     return app.segmentation_status
 
 
-def run_segmentation(status,getSegmentation):
+def run_segmentation(status, getSegmentation):
     status['status'] = "Running"
     print(status)
     print("Starting segmentation")
     getSegmentation(img_path = status['slide_path'],
                 save_path = get_mask_path(status['slide_path']),
-                status = status)
+                status = status,
+                mode  = status['tissuetype'])
     time.sleep(0.1)
     print("Segmentation done")
     status['status'] = "Done"
