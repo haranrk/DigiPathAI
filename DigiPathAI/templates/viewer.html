@@ -13,35 +13,33 @@
     <div id="sidebar" class="container" >
         <br>
         <div class="col">
-            <div class="form-group">
-                <button class="btn btn-default dropdown-toggle form-control" type="button" id="tissuetypemenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                    Tissue Type <strong style="color: red;">*</strong>
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu" aria-labelledby="tissuetypemenu" id="tissuetypedd">
-                    <li><a href="#">Colon Tissue</a></li>
-                    <li><a href="#">Liver Tissue</a></li>
-                    <li><a href="#">Breast Tissue</a></li>
-                </ul>
-            </div>
             <div class="row">
                     <div class="custom-control custom-switch">
                         <input type="checkbox" class="custom-control-input" id="toggle-btn">
                         <label class="custom-control-label" for="toggle-btn" id="overlay-text"></label>
                     </div>
             </div>
-            <br>
+            <hr/>
             <div class="row">
+                <div class="form-group">
+                    <button class="btn btn-dark dropdown-toggle form-control" type="button" id="tissuetypemenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                        Tissue Type <strong style="color: red;">*</strong>
+                        <span class="caret"></span>
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="tissuetypemenu" id="tissuetypedd">
+                        <a class="dropdown-item" href="#">Colon Tissue</a>
+                        <a class="dropdown-item" href="#">Liver Tissue</a>
+                        <a class="dropdown-item" href="#">Breast Tissue</a>
+                    </div>
+                </div>
                     {% if viewer_only %}
-                        <button id="get-segmentation-btn" class='btn btn-dark' disabled>Segmentation Disabled</button>
+                        <button id="get-segmentation-btn" class='btn btn-success' disabled>Segmentation Disabled</button>
 			<p>GPU not available</p>
                     {% else %}
                     <form>
-                        <a href=# ><button id="get-segmentation-btn" class='btn btn-dark'>Get segmentation</button></a>
+                        <a href=# ><button id="get-segmentation-btn" class='btn btn-success'>Get segmentation</button></a>
                     </form>
                     {% endif %}
-            </div>
-            <div class="row">
                 <div class="col">
                     <a id="segment-status"></a>
                     <a id="segment-progress"></a>
@@ -50,7 +48,7 @@
             <div class="progress" id="segment-progress" style="display: none;">
                 <div class="progress-bar" role="progressbar" style="" aria-valuenow="" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
-            <br>
+            <hr/>
             <div class="row">
                     <h2>Image List</h2>
                     <ul>
