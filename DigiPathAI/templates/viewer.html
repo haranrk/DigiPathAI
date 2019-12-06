@@ -13,6 +13,17 @@
     <div id="sidebar" class="container" >
         <br>
         <div class="col">
+            <div class="form-group">
+                <button class="btn btn-default dropdown-toggle form-control" type="button" id="tissuetypemenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    Tissue Type <strong style="color: red;">*</strong>
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="tissuetypemenu" id="tissuetypedd">
+                    <li><a href="#">Colon Tissue</a></li>
+                    <li><a href="#">Liver Tissue</a></li>
+                    <li><a href="#">Breast Tissue</a></li>
+                </ul>
+            </div>
             <div class="row">
                     <div class="custom-control custom-switch">
                         <input type="checkbox" class="custom-control-input" id="toggle-btn">
@@ -211,8 +222,20 @@ $(document).ready(function() {
     }
     
     var intervalId;
+    var tissuetype = null;
+
+    $(function () {
+        $("#tissuetypedd a").click(function () {
+        $("#tissuetypemenu").html($(this).html() + ' <span class="caret"></span>');
+        tissuetype = $(this).html();
+        });
+    });
 
     $('#get-segmentation-btn').bind('click', function() {
+            if (tissuetype == null){
+                alert("Select Tissue Type");
+                return false;
+            }
                 $.getJSON('/segment',
                     function(data) {
                         console.log(data);
