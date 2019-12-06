@@ -87,7 +87,7 @@ def get_prediction(wsi_path,
 	dataloader = DataLoader(dataset_obj, batch_size=batch_size, num_workers=num_workers, drop_last=True)
 	dataset_obj.save_scaled_imgs()
 
-	print (dataloader.dataset.__len__(), dataloader.__len__())
+	print ("========================", dataloader.dataset.__len__(), dataloader.__len__())
 	
 	if tta_list == None:
 		tta_list = np.array(['DEFAULT'])
@@ -131,17 +131,17 @@ def get_prediction(wsi_path,
 													   batch_size=batch_size, 
 													   verbose=verbose, steps=None)
 				for i in range(batch_size):
-					try: 
-						prediction_trans = transform_prob(prediction[i], tta_)/(1.*len(tta_list))
-						shape = prediction_trans.shape
+					# try: 
+					prediction_trans = transform_prob(prediction[i], tta_)/(1.*len(tta_list))
+					shape = prediction_trans.shape
+					print ("===================", shape)
+					probs_map[model_name][x_coords[i]-shape[0]//2: x_coords[i]+shape[0]//2 , 
+							y_coords[i]-shape[1]//2: y_coords[i]+shape[1]//2]  += prediction_trans[:,:,1]
 
-						probs_map[model_name][x_coords[i]-shape[0]//2: x_coords[i]+shape[0]//2 , 
-								y_coords[i]-shape[1]//2: y_coords[i]+shape[1]//2]  += prediction_trans[:,:,1]
-
-						if j == 0:
-							count_map[x_coords[i]-shape[0]//2: x_coords[i]+shape[0]//2, 
-									 y_coords[i]-shape[1]//2: y_coords[i]+shape[1]//2] += np.ones_like(prediction[0,: ,:,1])
-					except: continue
+					if j == 0:
+						count_map[x_coords[i]-shape[0]//2: x_coords[i]+shape[0]//2, 
+								 y_coords[i]-shape[1]//2: y_coords[i]+shape[1]//2] += np.ones_like(prediction[0,: ,:,1])
+					# except: continue
 	
 	if label_path:
 		return (dataset_obj.get_image(),
