@@ -27,9 +27,9 @@
                         <span class="caret"></span>
                     </button>
                     <div class="dropdown-menu" aria-labelledby="tissuetypemenu" id="tissuetypedd">
-                        <a class="dropdown-item" href="#">Colon Tissue</a>
-                        <a class="dropdown-item" href="#">Liver Tissue</a>
-                        <a class="dropdown-item" href="#">Breast Tissue</a>
+                        <a class="dropdown-item" href="#">Colon</a>
+                        <a class="dropdown-item" href="#">Liver</a>
+                        <a class="dropdown-item" href="#">Breast</a>
                     </div>
                 </div>
                     {% if viewer_only %}
@@ -234,15 +234,36 @@ $(document).ready(function() {
                 alert("Select Tissue Type");
                 return false;
             }
-                $.getJSON('/segment',
-                    function(data) {
-                        console.log("===================");
+                // $.getJSON('/segment',
+                //     function(data) {
+                //         console.log("===================");
+                //         console.log(data);
+                //         $('#get-segmentation-btn').prop('disabled',true);
+                //         intervalId=setInterval(update_segment_status,2000);
+                //         update_segment_status();
+                // });
+
+
+                $.ajax({
+                    url: '/segment',
+                    type: "POST",
+                    data: {tissuetype: tissuetype},
+                    dataType: "json",
+                    success: function (data) {
                         console.log(data);
                         $('#get-segmentation-btn').prop('disabled',true);
-                        intervalId=setInterval(update_segment_status,2000);
+                        intervalId = setInterval(update_segment_status,2000);
                         update_segment_status();
+                    },
+                    error: function(data) {
+                        console.log("error ...")
+                        console.log(data);
+                    }
                 });
+
                 return false;
               });
 });
 </script>
+
+

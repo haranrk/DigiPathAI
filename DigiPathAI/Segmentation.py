@@ -180,12 +180,17 @@ def getSegmentation(img_path,
                 crf: application of conditional random fields in post processing step (bool)
                 save_path: path to save final segmentation mask (str)
                 status: required for webserver (json)
+                mode: tissue type
 
             return :
                 saves the prediction in given path (in .tiff format)
                 prediction: predicted segmentation mask
 
 	"""
+
+	mode = mode.lower()
+	print ("==================================================")
+	print (mode)
 	if mode not in ['colon', 'liver', 'breast']: raise ValueError("Unknown mode found, allowed fields are: ['colon', 'liver', 'breast']")
 
 	if mode == 'colon':
