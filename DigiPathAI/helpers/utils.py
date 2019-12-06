@@ -63,11 +63,37 @@ def download_digestpath():
         os.makedirs(model_path, exist_ok=True)
         wget.download('https://github.com/haranrk/DigiPathAI/releases/download/models/digestpath_deeplabv3.h5',
                         out = model_path)
-        wget.download('https://github.com/haranrk/DigiPathAI/releases/download/models/digestpath_densenet_fold1.h5',
-                        out = model_path)
-        wget.download('https://github.com/haranrk/DigiPathAI/releases/download/models/digestpath_densenet_fold2.h5',
+        wget.download('https://github.com/haranrk/DigiPathAI/releases/download/models/digestpath_densenet.h5',
                         out = model_path)
         wget.download('https://github.com/haranrk/DigiPathAI/releases/download/models/digestpath_inception.h5',
+                        out = model_path)
+
+def download_paip():
+    """
+        Downloads nobrainer models for transferleraning
+    """
+    model_path = os.path.join(home, '.DigiPathAI/digestpath_models')
+    if (not os.path.exists(model_path)) or (len(os.listdir(model_path)) == 0):
+        os.makedirs(model_path, exist_ok=True)
+        wget.download('https://github.com/haranrk/DigiPathAI/releases/download/models/piap_deeplabv3.h5',
+                        out = model_path)
+        wget.download('https://github.com/haranrk/DigiPathAI/releases/download/models/piap_densenet.h5',
+                        out = model_path)
+        wget.download('https://github.com/haranrk/DigiPathAI/releases/download/models/piap_inception.h5',
+                        out = model_path)
+
+def download_camelyon():
+    """
+        Downloads nobrainer models for transferleraning
+    """
+    model_path = os.path.join(home, '.DigiPathAI/digestpath_models')
+    if (not os.path.exists(model_path)) or (len(os.listdir(model_path)) == 0):
+        os.makedirs(model_path, exist_ok=True)
+        wget.download('https://github.com/haranrk/DigiPathAI/releases/download/models/camelyon_deeplabv3.h5',
+                        out = model_path)
+        wget.download('https://github.com/haranrk/DigiPathAI/releases/download/models/camelyon_densenet.h5',
+                        out = model_path)
+        wget.download('https://github.com/haranrk/DigiPathAI/releases/download/models/camelyon_inception.h5',
                         out = model_path)
 
 
