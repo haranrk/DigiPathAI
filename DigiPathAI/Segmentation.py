@@ -87,7 +87,6 @@ def get_prediction(wsi_path,
 	dataloader = DataLoader(dataset_obj, batch_size=batch_size, num_workers=num_workers, drop_last=True)
 	dataset_obj.save_scaled_imgs()
 
-	print ("========================", dataloader.dataset.__len__(), dataloader.__len__())
 	
 	if tta_list == None:
 		tta_list = np.array(['DEFAULT'])
@@ -134,7 +133,6 @@ def get_prediction(wsi_path,
 					# try: 
 					prediction_trans = transform_prob(prediction[i], tta_)/(1.*len(tta_list))
 					shape = prediction_trans.shape
-					print ("===================", shape)
 					probs_map[model_name][x_coords[i]-shape[0]//2: x_coords[i]+shape[0]//2 , 
 							y_coords[i]-shape[1]//2: y_coords[i]+shape[1]//2]  += prediction_trans[:,:,1]
 
@@ -167,7 +165,8 @@ def getSegmentation(img_path,
 			tta_list    = None,
 			crf         = False,
 			save_path   = '../Results',
-			status      = None):
+			status      = None,
+			mode        = 'colon'):
 	"""
             args:
                 img_path: WSI tiff image path (str)
@@ -187,24 +186,56 @@ def getSegmentation(img_path,
                 prediction: predicted segmentation mask
 
 	"""
-	
-	path = os.path.join(home, '.DigiPathAI/digestpath_models')
-	if (not os.path.exists(os.path.join(path, 'digestpath_inception.h5'))) or \
-		(not os.path.exists(os.path.join(path, 'digestpath_deeplabv3.h5'))) or \
-		(not os.path.exists(os.path.join(path, 'digestpath_densenet_fold2.h5'))) or \
-		(not os.path.exists(os.path.join(path, 'digestpath_densenet_fold1.h5'))):
-		if status is not None: status['status'] = "Downloading Trained Models"
-		download_digestpath() 
-		model_path_inception = os.path.join(path, 'digestpath_inception.h5')
-		model_path_deeplabv3 = os.path.join(path, 'digestpath_deeplabv3.h5')
-		model_path_densenet2 = os.path.join(path, 'digestpath_densenet_fold2.h5')
-		model_path_densenet1 = os.path.join(path, 'digestpath_densenet_fold1.h5')
-	else :
-		if status is not None: status['status'] = "Found Trained Models, Skipping download"
-		model_path_inception = os.path.join(path, 'digestpath_inception.h5')
-		model_path_deeplabv3 = os.path.join(path, 'digestpath_deeplabv3.h5')
-		model_path_densenet2 = os.path.join(path, 'digestpath_densenet_fold2.h5')
-		model_path_densenet1 = os.path.join(path, 'digestpath_densenet_fold1.h5')
+	if mode not in ['colon', 'liver', 'breast']: raise ValueError("Unknown mode found, allowed fields are: ['colon', 'liver', 'breast']")
+
+	if mode == 'colon':
+		path = os.path.join(home, '.DigiPathAI/digestpath_models')
+		if (not os.path.exists(os.path.join(path, 'digestpath_inception.h5'))) or \
+			(not os.path.exists(os.path.join(path, 'digestpath_deeplabv3.h5'))) or \
+			(not os.path.exists(os.path.join(path, 'digestpath_densenet.h5'))):
+			if status is not None: status['status'] = "Downloading Trained Models"
+			download_digestpath() 
+			model_path_inception = os.path.join(path, 'digestpath_inception.h5')
+			model_path_deeplabv3 = os.path.join(path, 'digestpath_deeplabv3.h5')
+			model_path_densenet = os.path.join(path, 'digestpath_densenet.h5')
+		else :
+			if status is not None: status['status'] = "Found Trained Models, Skipping download"
+			model_path_inception = os.path.join(path, 'digestpath_inception.h5')
+			model_path_deeplabv3 = os.path.join(path, 'digestpath_deeplabv3.h5')
+			model_path_densenet = os.path.join(path, 'digestpath_densenet.h5')
+
+	elif mode == 'liver':
+		path = os.path.join(home, '.DigiPathAI/paip_models')
+		if (not os.path.exists(os.path.join(path, 'paip_inception.h5'))) or \
+			(not os.path.exists(os.path.join(path, 'paip_deeplabv3.h5'))) or \
+			(not os.path.exists(os.path.join(path, 'paip_densenet.h5'))):
+			if status is not None: status['status'] = "Downloading Trained Models"
+			download_paip() 
+			model_path_inception = os.path.join(path, 'paip_inception.h5')
+			model_path_deeplabv3 = os.path.join(path, 'paip_deeplabv3.h5')
+			model_path_densenet  = os.path.join(path, 'paip_densenet.h5')
+		else :
+			if status is not None: status['status'] = "Found Trained Models, Skipping download"
+			model_path_inception = os.path.join(path, 'paip_inception.h5')
+			model_path_deeplabv3 = os.path.join(path, 'paip_deeplabv3.h5')
+			model_path_densenet  = os.path.join(path, 'paip_densenet.h5')
+
+	elif mode == 'breast':
+		path = os.path.join(home, '.DigiPathAI/camelyon_models')
+		if (not os.path.exists(os.path.join(path, 'camelyon_inception.h5'))) or \
+			(not os.path.exists(os.path.join(path, 'camelyon_deeplabv3.h5'))) or \
+			(not os.path.exists(os.path.join(path, 'camelyon_densenet.h5'))):
+			if status is not None: status['status'] = "Downloading Trained Models"
+			download_camelyon() 
+			model_path_inception = os.path.join(path, 'camelyon_inception.h5')
+			model_path_deeplabv3 = os.path.join(path, 'camelyon_deeplabv3.h5')
+			model_path_densenet = os.path.join(path, 'camelyon_densenet.h5')
+		else :
+			if status is not None: status['status'] = "Found Trained Models, Skipping download"
+			model_path_inception = os.path.join(path, 'camelyon_inception.h5')
+			model_path_deeplabv3 = os.path.join(path, 'camelyon_deeplabv3.h5')
+			model_path_densenet  = os.path.join(path, 'camelyon_densenet.h5')
+
 
 	if status is not None: status['status'] = "Loading Trained weights"
 	core_config = tf.ConfigProto()
@@ -213,12 +244,11 @@ def getSegmentation(img_path,
 	K.set_session(session)
 
 	if not quick:
-		models_to_consider = {'dense1': model_path_densenet1,
-						  'dense2': model_path_densenet2, 
+		models_to_consider = {'dense': model_path_densenet, 
 						  'inception': model_path_inception, 
 						  'deeplabv3': model_path_deeplabv3}
 	else:
-		models_to_consider = {'dense1': model_path_densenet1}
+		models_to_consider = {'dense': model_path_densenet}
 
 	models = {}
 	for i, model_name in enumerate(models_to_consider.keys()):
