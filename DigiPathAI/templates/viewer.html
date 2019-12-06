@@ -35,9 +35,9 @@
                     <a id="segment-status"></a>
                     <a id="segment-progress"></a>
                 </div>
-                <div class="progress" id="segment-progress" style="display: none">
-                    <div class="progress-bar" role="progressbar" style="" aria-valuenow="" aria-valuemin="0" aria-valuemax="100"></div>
-                </div>
+            </div>
+            <div class="progress" id="segment-progress" style="display: none;">
+                <div class="progress-bar" role="progressbar" style="" aria-valuenow="" aria-valuemin="0" aria-valuemax="100"></div>
             </div>
             <br>
             <div class="row">
@@ -199,10 +199,11 @@ $(document).ready(function() {
                 console.log(data);
                 $('#segment-status').text(data.status);
                 $('#segment-progress').text(data.progress);
+                $('.progress').show();
                 $('.progress-bar').attr('style', 'width: ' + Number(data.progress) + '%');
                 if(data.status==="Done"){
                     clearInterval(intervalId);
-		    location.reload(true);
+		            location.reload(true);
                     $('#segment-progress').hide("slow");
                     enable_overlay(true);
                 }
@@ -212,7 +213,6 @@ $(document).ready(function() {
     var intervalId;
 
     $('#get-segmentation-btn').bind('click', function() {
-		$('.progress').show();
                 $.getJSON('/segment',
                     function(data) {
                         console.log(data);
