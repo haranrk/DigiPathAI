@@ -139,7 +139,7 @@ def segment():
     else:
         sys.path.append('..')
         from DigiPathAI.Segmentation import getSegmentation
-        x = threading.Thread(target=run_segmentation, args=(app.segmentation_status,getSegmentation))
+        x = threading.Thread(target=run_segmentation, args=(app.segmentation_status, getSegmentation))
         x.start()
     return app.segmentation_status
 

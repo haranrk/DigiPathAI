@@ -207,7 +207,7 @@ $(document).ready(function() {
     function update_segment_status(){
         $.getJSON('/check_segment_status',
             function(data){
-                console.log(data);
+                //console.log(data);
                 $('#segment-status').text(data.status);
                 $('#segment-progress').text(data.progress);
                 $('.progress').show();
@@ -238,6 +238,7 @@ $(document).ready(function() {
             }
                 $.getJSON('/segment',
                     function(data) {
+                        console.log("===================");
                         console.log(data);
                         $('#get-segmentation-btn').prop('disabled',true);
                         intervalId=setInterval(update_segment_status,2000);
