@@ -1,15 +1,15 @@
 function dark_on(){
     $('nav').removeClass("navbar-light");
     $('nav').addClass("navbar-dark");
-    $('#get-segmentation-btn').removeClass('btn-success');
-    $('#get-segmentation-btn').addClass('btn-dark');
+    //$('#get-segmentation-btn').removeClass('btn-success');
+    //$('#get-segmentation-btn').addClass('btn-dark');
     $('table').addClass('table-dark');
 }
 function dark_off(){
     $('nav').removeClass("navbar-dark");
     $('nav').addClass("navbar-light");
-    $('#get-segmentation-btn').removeClass('btn-dark');
-    $('#get-segmentation-btn').addClass('btn-success');
+    //$('#get-segmentation-btn').removeClass('btn-dark');
+    //$('#get-segmentation-btn').addClass('btn-success');
     $('table').removeClass('table-dark');
 }
 (function() {
