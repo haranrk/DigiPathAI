@@ -448,18 +448,22 @@ def load_trained_models(model, path, patch_size=256):
 
 # postprocessing helpers
 
-def get_mean_img(probs, count_map):
-   
-    temp = []
-    # dilate_kernel = np.ones((5, 5), dtype=np.uint8)
-    for ii in probs:
-        # ii = cv2.morphologyEx(np.array(ii), cv2.MORPH_DILATE, dilate_kernel).astype('float')
-        temp.append(ii/count_map.astype('float'))
-        
+def get_mean_img(probs, count_map, mempath=None):
+    
+    probs = np.array(list(probs))
+    os.makedirs(mempath,exist_ok=True)
+    
+    temp = np.memmap(os.path.join(mempath,'%s.dat'%('temp')), 
+                            dtype=np.float32,
+                            mode='w+', 
+                            shape=probs.shape)
+
+    probs = probs/np.array(count_map[None, ...], dtype='float16')
+
     probs = np.array(temp)
     mean_probs = np.mean(probs, axis=0)
     # mean_probs = cv2.morphologyEx(np.array(mean_probs), cv2.MORPH_ERODE, dilate_kernel)
-    return mean_probs, np.mean(np.var(probs, axis=0))
+    return mean_probs, np.var(probs, axis=0)
 
 
 def BinMorphoProcessMask(mask):

@@ -246,6 +246,8 @@ class WSIStridedPatchDataset(Dataset):
         
         factor = self._sampling_stride
         self._level = len(self._slide.level_dimensions) - 1
+        self._sampling_stride = self._sampling_stride / (2.0**self._level)
+
         print (self._level)
 
         if self._mask_path is not None:
