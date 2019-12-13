@@ -75,6 +75,7 @@ def get_prediction(wsi_path,
 	"""
 			patch based segmentor
 	"""
+
 	dataset_obj = WSIStridedPatchDataset(wsi_path, 
 										mask_path,
 										label_path,
@@ -86,6 +87,7 @@ def get_prediction(wsi_path,
 
 
 	dataloader = DataLoader(dataset_obj, batch_size=batch_size, num_workers=num_workers, drop_last=True)
+	print ("Length of DataLoader: {}".format(len(dataloader)))
 
 	if tta_list == None:
 		tta_list = np.array(['DEFAULT'])
@@ -94,7 +96,6 @@ def get_prediction(wsi_path,
 		tta_list = np.concatenate([np.array(['DEFAULT']), tta_list])
 		
 	probs_map = {}
-	count_map = np.zeros(dataloader.dataset._slide.level_dimensions[0])
 	
 	eps = 0.0001
 	num_batch  = len(dataloader)
@@ -106,15 +107,18 @@ def get_prediction(wsi_path,
 	rotate = dataloader.dataset._rotate 
 
 	digipathai_folder = os.path.join(home, '.DigiPathAI')
-	os.makedirs(digipathai_folder, exist_ok=True)	
 	memmaps_path = os.path.join(digipathai_folder,'memmaps')
 	os.makedirs(memmaps_path,exist_ok=True)
 	for i, key in enumerate(models.keys()):
 		probs_map[key] = np.memmap(os.path.join(memmaps_path,'%s.dat'%(key)), 
 									dtype=np.float32,
 									mode='w+', 
-									shape=(dataloader.dataset._slide.level_dimensions[0]))
+									shape=dataloader.dataset._slide.level_dimensions[0])
 
+	count_map = np.memmap(os.path.join(memmaps_path,'%s.dat'%('ctmap')), 
+							dtype=np.float32,
+							mode='w+', 
+							shape = dataloader.dataset._slide.level_dimensions[0])
 	# for i, model_name in enumerate(models.keys()):
 	# 	probs_map[model_name] = np.zeros(dataloader.dataset._slide.level_dimensions[0])
 
@@ -141,7 +145,7 @@ def get_prediction(wsi_path,
 					try: 
 						prediction_trans = transform_prob(prediction[i], tta_)/(1.*len(tta_list))
 						shape = prediction_trans.shape
-						probs_map[model_name][x_coords[i]: x_coords[i]+shape[0] , 
+						probs_map[model_name][x_coords[i]: x_coords[i] + shape[0] , 
 								y_coords[i]: y_coords[i]+shape[1]]  += prediction_trans[:,:,1]
 
 						if j == 0:
@@ -154,7 +158,7 @@ def get_prediction(wsi_path,
 					probs_map,
 					count_map, 
 					dataset_obj.get_mask()/255, 
-					dataset_obj.get_label_mask()/255)
+					dataset_obj.get_label_mask())
 	else:
 		return (dataset_obj.get_image(),
 					probs_map,
@@ -283,8 +287,12 @@ def getSegmentation(img_path,
 	count_map[count_map == 0] = 1
 	# for key in probs_map.keys():
 	# 	probs_map[key] = BinMorphoProcessMask(probs_map[key])
-			
-	mean_probs, uncertanity = get_mean_img(probs_map.values(), count_map)
+
+	digipathai_folder = os.path.join(home, '.DigiPathAI')
+	memmaps_path = os.path.join(digipathai_folder,'memmaps')
+	os.makedirs(memmaps_path,exist_ok=True)
+
+	mean_probs, uncertanity = get_mean_img(probs_map.values(), count_map, memmaps_path)
 	mean_probs = mean_probs.T
 	uncertanity = uncertanity.T
 	mean_probs = mean_probs[..., None]
