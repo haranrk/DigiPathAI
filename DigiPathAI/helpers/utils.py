@@ -204,7 +204,7 @@ def BinMorphoProcessMaskOS(mask, level):
     image_close = cv2.morphologyEx(np.array(mask), cv2.MORPH_CLOSE, close_kernel)
     open_kernel = np.ones((5, 5), dtype=np.uint8)
     image_open = cv2.morphologyEx(np.array(image_close), cv2.MORPH_OPEN, open_kernel)
-    if level == 2:
+    if level <= 2:
         kernel = np.ones((60, 60), dtype=np.uint8)
     elif level == 3:
         kernel = np.ones((35, 35), dtype=np.uint8)
