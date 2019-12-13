@@ -75,7 +75,6 @@ def get_prediction(wsi_path,
 	"""
             patch based segmentor
 	"""
-	print ("in get prediction ---------------")
 	dataset_obj = WSIStridedPatchDataset(wsi_path, 
 										mask_path,
 										label_path,
@@ -87,8 +86,6 @@ def get_prediction(wsi_path,
 
 
 	dataloader = DataLoader(dataset_obj, batch_size=batch_size, num_workers=num_workers, drop_last=True)
-	print("==============================")
-	print (len(dataloader))
 
 	if tta_list == None:
 		tta_list = np.array(['DEFAULT'])
@@ -132,16 +129,16 @@ def get_prediction(wsi_path,
 													   batch_size=batch_size, 
 													   verbose=verbose, steps=None)
 				for i in range(batch_size):
-					# try: 
-					prediction_trans = transform_prob(prediction[i], tta_)/(1.*len(tta_list))
-					shape = prediction_trans.shape
-					probs_map[model_name][x_coords[i]-shape[0]//2: x_coords[i]+shape[0]//2 , 
-							y_coords[i]-shape[1]//2: y_coords[i]+shape[1]//2]  += prediction_trans[:,:,1]
+					try: 
+						prediction_trans = transform_prob(prediction[i], tta_)/(1.*len(tta_list))
+						shape = prediction_trans.shape
+						probs_map[model_name][x_coords[i]: x_coords[i]+shape[0] , 
+								y_coords[i]: y_coords[i]+shape[1]]  += prediction_trans[:,:,1]
 
-					if j == 0:
-						count_map[x_coords[i]-shape[0]//2: x_coords[i]+shape[0]//2, 
-								 y_coords[i]-shape[1]//2: y_coords[i]+shape[1]//2] += np.ones_like(prediction[0,: ,:,1])
-					# except: continue
+						if j == 0:
+							count_map[x_coords[i]-shape[0]//2: x_coords[i]+shape[0]//2, 
+									 y_coords[i]-shape[1]//2: y_coords[i]+shape[1]//2] += np.ones_like(prediction[0,: ,:,1])
+					except: continue
 	
 	if label_path:
 		return (dataset_obj.get_image(),
@@ -162,7 +159,7 @@ def get_prediction(wsi_path,
 def getSegmentation(img_path, 
 			patch_size  = 256, 
 			stride_size = 128,
-			batch_size  = 100,
+			batch_size  = 32,
 			quick       = True,
 			tta_list    = None,
 			crf         = False,
@@ -279,6 +276,8 @@ def getSegmentation(img_path,
 	# 	probs_map[key] = BinMorphoProcessMask(probs_map[key])
 			
 	mean_probs, uncertanity = get_mean_img(probs_map.values(), count_map)
+	mean_probs = mean_probs.T
+	uncertanity = uncertanity.T
 	mean_probs = mean_probs[..., None]
 	
 	if crf:
