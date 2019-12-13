@@ -64,7 +64,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = '0'
 def get_prediction(wsi_path, 
 				   mask_path=None, 
 				   label_path=None, 
-				   batch_size=8, 
+				   batch_size=64, 
 				   models=None, 
 				   tta_list=None,
 				   num_workers=8, 
@@ -75,19 +75,21 @@ def get_prediction(wsi_path,
 	"""
             patch based segmentor
 	"""
+	print ("in get prediction ---------------")
 	dataset_obj = WSIStridedPatchDataset(wsi_path, 
 										mask_path,
 										label_path,
 										image_size=patch_size,
 										normalize=True,
 										flip=None, rotate=None,
-										sampling_stride=stride_size, roi_masking=True)
+										sampling_stride=stride_size, 
+										roi_masking=True)
 
 
 	dataloader = DataLoader(dataset_obj, batch_size=batch_size, num_workers=num_workers, drop_last=True)
-	dataset_obj.save_scaled_imgs()
+	print("==============================")
+	print (len(dataloader))
 
-	
 	if tta_list == None:
 		tta_list = np.array(['DEFAULT'])
 	else:
@@ -160,7 +162,7 @@ def get_prediction(wsi_path,
 def getSegmentation(img_path, 
 			patch_size  = 256, 
 			stride_size = 128,
-			batch_size  = 32,
+			batch_size  = 100,
 			quick       = True,
 			tta_list    = None,
 			crf         = False,
@@ -175,7 +177,7 @@ def getSegmentation(img_path,
                 batch_size: batch_size during inference (int)
                 quick: if True; final segmentation is ensemble of 4 different models
                         else: prediction is of single model (bool)
-                tta_list: type of augmentation required during inference
+                tta_list: type of augmentation required/examples/colon-cancer-1-slide.tiff# during inference
                          allowed: ['FLIP_LEFT_RIGHT', 'ROTATE_90', 'ROTATE_180', 'ROTATE_270'] (list(str))
                 crf: application of conditional random fields in post processing step (bool)
                 save_path: path to save final segmentation mask (str)
@@ -266,7 +268,7 @@ def getSegmentation(img_path,
 	img, probs_map, count_map, tissue_mask, label_mask  = get_prediction(img_path, 
 									mask_path = None, 
 									label_path = None,
-					  			        batch_size = batch_size,
+					  			    batch_size = batch_size,
 									tta_list = tta_list,
 									models = models,
 									patch_size = patch_size,

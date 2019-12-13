@@ -245,32 +245,29 @@ class WSIStridedPatchDataset(Dataset):
         print("Image dimensions: (%d,%d)" %(X_slide,Y_slide))
         
         factor = self._sampling_stride
+        self._level = len(self._slide.level_dimensions) - 1
+        print (self._level)
 
-        flag = False
-        while not flag:
-            try: 
-                if self._mask_path is not None:
-                    mask_file_name = os.path.basename(self._mask_path)
-                    if mask_file_name.endswith('.tiff'):
-                        mask_obj = openslide.OpenSlide(self._mask_path)
-                        self._mask = np.array(mask_obj.read_region((0, 0),
-                               self._level,
-                               mask_obj.level_dimensions[self._level]).convert('L')).T
-                        np.place(self._mask,self._mask>0,255)
-                else:
-                    # Generate tissue mask on the fly    
-                    
-                    self._mask = TissueMaskGenerationOS(self._slide, self._level)
-                # morphological operations ensure the holes are filled in tissue mask
-                # and minor points are aggregated to form a larger chunk         
+        if self._mask_path is not None:
+            mask_file_name = os.path.basename(self._mask_path)
+            if mask_file_name.endswith('.tiff'):
+                mask_obj = openslide.OpenSlide(self._mask_path)
+                self._mask = np.array(mask_obj.read_region((0, 0),
+                       self._level,
+                       mask_obj.level_dimensions[self._level]).convert('L')).T
+                np.place(self._mask,self._mask>0,255)
+        else:
+            # Generate tissue mask on the fly    
+            
+            self._mask = TissueMaskGenerationOS(self._slide, self._level)
+        # morphological operations ensure the holes are filled in tissue mask
+        # and minor points are aggregated to form a larger chunk         
 
-                self._mask = BinMorphoProcessMaskOS(np.uint8(self._mask),self._level)
-                # self._all_bbox_mask = get_all_bbox_masks(self._mask, factor)
-                # self._largest_bbox_mask = find_largest_bbox(self._mask, factor)
-                # self._all_strided_bbox_mask = get_all_bbox_masks_with_stride(self._mask, factor)
-                flag = True
-            except:
-                self._level = self._level - 1
+        self._mask = BinMorphoProcessMaskOS(np.uint8(self._mask),self._level)
+        # self._all_bbox_mask = get_all_bbox_masks(self._mask, factor)
+        # self._largest_bbox_mask = find_largest_bbox(self._mask, factor)
+        # self._all_strided_bbox_mask = get_all_bbox_masks_with_stride(self._mask, factor)
+
 
         X_mask, Y_mask = self._mask.shape
         # print (self._mask.shape, np.where(self._mask>0))
