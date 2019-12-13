@@ -3,7 +3,7 @@ A software application built on top of [openslide](https://openslide.org/) for v
 
 # Features
 - Responsive WSI image viewer 
-- State of the art cancer AI pipeline to segment the and display the cancer cell
+- State of the art cancer AI pipeline to segment and display the cancerous tissue regions
 
 # Application Overview
 <p align="center">
