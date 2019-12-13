@@ -73,7 +73,7 @@ def get_prediction(wsi_path,
 				   stride_size = 256,
 				   status = None):
 	"""
-            patch based segmentor
+			patch based segmentor
 	"""
 	dataset_obj = WSIStridedPatchDataset(wsi_path, 
 										mask_path,
@@ -104,10 +104,19 @@ def get_prediction(wsi_path,
 	factor = dataloader.dataset._sampling_stride
 	flip   = dataloader.dataset._flip
 	rotate = dataloader.dataset._rotate 
-		
-	
-	for i, model_name in enumerate(models.keys()):
-		probs_map[model_name] = np.zeros(dataloader.dataset._slide.level_dimensions[0])
+
+	digipathai_folder = os.path.join(home, '.DigiPathAI')
+	os.makedirs(digipathai_folder, exist_ok=True)	
+	memmaps_path = os.path.join(digipathai_folder,'memmaps')
+	os.makedirs(memmaps_path,exist_ok=True)
+	for i, key in enumerate(models.keys()):
+		probs_map[key] = np.memmap(os.path.join(memmaps_path,'%s.dat'%(key)), 
+									dtype=np.float32,
+									mode='w+', 
+									shape=(dataloader.dataset._slide.level_dimensions[0]))
+
+	# for i, model_name in enumerate(models.keys()):
+	# 	probs_map[model_name] = np.zeros(dataloader.dataset._slide.level_dimensions[0])
 
 	for i, (image_patches, x_coords, y_coords, label_patches) in enumerate(dataloader):
 		
@@ -167,23 +176,23 @@ def getSegmentation(img_path,
 			status      = None,
 			mode        = 'colon'):
 	"""
-            args:
-                img_path: WSI tiff image path (str)
-                patch_size: patch size for inference (int)
-                stride_size: stride to skip during segmentation (int)
-                batch_size: batch_size during inference (int)
-                quick: if True; final segmentation is ensemble of 4 different models
-                        else: prediction is of single model (bool)
-                tta_list: type of augmentation required/examples/colon-cancer-1-slide.tiff# during inference
-                         allowed: ['FLIP_LEFT_RIGHT', 'ROTATE_90', 'ROTATE_180', 'ROTATE_270'] (list(str))
-                crf: application of conditional random fields in post processing step (bool)
-                save_path: path to save final segmentation mask (str)
-                status: required for webserver (json)
-                mode: tissue type
+			args:
+				img_path: WSI tiff image path (str)
+				patch_size: patch size for inference (int)
+				stride_size: stride to skip during segmentation (int)
+				batch_size: batch_size during inference (int)
+				quick: if True; final segmentation is ensemble of 4 different models
+						else: prediction is of single model (bool)
+				tta_list: type of augmentation required/examples/colon-cancer-1-slide.tiff# during inference
+						 allowed: ['FLIP_LEFT_RIGHT', 'ROTATE_90', 'ROTATE_180', 'ROTATE_270'] (list(str))
+				crf: application of conditional random fields in post processing step (bool)
+				save_path: path to save final segmentation mask (str)
+				status: required for webserver (json)
+				mode: tissue type
 
-            return :
-                saves the prediction in given path (in .tiff format)
-                prediction: predicted segmentation mask
+			return :
+				saves the prediction in given path (in .tiff format)
+				prediction: predicted segmentation mask
 
 	"""
 
@@ -265,7 +274,7 @@ def getSegmentation(img_path,
 	img, probs_map, count_map, tissue_mask, label_mask  = get_prediction(img_path, 
 									mask_path = None, 
 									label_path = None,
-					  			    batch_size = batch_size,
+									batch_size = batch_size,
 									tta_list = tta_list,
 									models = models,
 									patch_size = patch_size,
