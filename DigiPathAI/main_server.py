@@ -105,8 +105,9 @@ def _setup():
     app.segmentation_status = {"status":""}
 
 def mask_exists(path):
-    mask_path = '-'.join(path.split('-')[:-1]+["mask"])+'.'+path.split('.')[-1]
-    if os.path.isfile(mask_path):
+    mask_path1 = '-'.join(path.split('-')[:-1]+["mask"])+'.'+path.split('.')[-1]
+    mask_path2 = mask_path.replace('.svs', '.tiff')
+    if os.path.isfile(mask_path1) or os.path.isfile(mask_path2):
         return True
     else:
         return False
