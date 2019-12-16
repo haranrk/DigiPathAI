@@ -109,23 +109,31 @@ def get_prediction(wsi_path,
 	digipathai_folder = os.path.join(home, '.DigiPathAI')
 	memmaps_path = os.path.join(digipathai_folder,'memmaps')
 	os.makedirs(memmaps_path,exist_ok=True)
-	for i, key in enumerate(models.keys()):
-		probs_map[key] = np.memmap(os.path.join(memmaps_path,'%s.dat'%(key)), 
-									dtype=np.float32,
-									mode='w+', 
-									shape=dataloader.dataset._slide.level_dimensions[0])
 
-	count_map = np.memmap(os.path.join(memmaps_path,'%s.dat'%('ctmap')), 
-							dtype=np.float32,
-							mode='w+', 
-							shape = dataloader.dataset._slide.level_dimensions[0])
+
+	probs_map['mean'] = np.memmap(os.path.join(memmaps_path,'%s.dat'%('mean')), 
+								dtype=np.float32,
+								mode='w+', 
+								shape=(dataloader.dataset._slide.level_dimensions[0]))
+
+	probs_map['var'] = np.memmap(os.path.join(memmaps_path,'%s.dat'%('var')), 
+								dtype=np.float32,
+								mode='w+', 
+								shape=(dataloader.dataset._slide.level_dimensions[0]))
+
+	count_map = np.memmap(os.path.join(memmaps_path,'%s.dat'%('count_map')), 
+								dtype=np.float32,
+								mode='w+', 
+								shape=(dataloader.dataset._slide.level_dimensions[0]))
+
+	count_map[:, :] = 0
 	# for i, model_name in enumerate(models.keys()):
 	# 	probs_map[model_name] = np.zeros(dataloader.dataset._slide.level_dimensions[0])
 
-	for i, (image_patches, x_coords, y_coords, label_patches) in enumerate(dataloader):
+	for ii, (image_patches, x_coords, y_coords, label_patches) in enumerate(dataloader):
 		
 		if status is not None:
-			status['progress'] = int(i*100.0/ len(dataloader))
+			status['progress'] = int(ii*100.0/ (len(models.keys())*len(dataloader)))
 
 
 		image_patches = image_patches.cpu().data.numpy()
@@ -133,36 +141,49 @@ def get_prediction(wsi_path,
 		x_coords = x_coords.cpu().data.numpy()
 		y_coords = y_coords.cpu().data.numpy()
 		
-		for j, model_name in enumerate(models.keys()):
-			
-			for tta_ in tta_list:
-				image_patches = apply_tta(image_patches, tta_)
-			
+		
+		
+		patch_predictions = []
+		for tta_ in tta_list:
+			image_patches = apply_tta(image_patches, tta_)
+
+			for j, model_name in enumerate(models.keys()):
 				prediction = models[model_name].predict(image_patches, 
 													   batch_size=batch_size, 
 													   verbose=verbose, steps=None)
-				for i in range(batch_size):
-					try: 
-						prediction_trans = transform_prob(prediction[i], tta_)/(1.*len(tta_list))
-						shape = prediction_trans.shape
-						probs_map[model_name][x_coords[i]: x_coords[i] + shape[0] , 
-								y_coords[i]: y_coords[i]+shape[1]]  += prediction_trans[:,:,1]
+				try: 
+					prediction_trans = np.array([transform_prob(prediction[i], tta_) for i in range(batch_size)])
+					patch_predictions.append(prediction_trans)
+				except: continue
 
-						if j == 0:
-							count_map[x_coords[i]-shape[0]//2: x_coords[i]+shape[0]//2, 
-									 y_coords[i]-shape[1]//2: y_coords[i]+shape[1]//2] += np.ones_like(prediction[0,: ,:,1])
-					except: continue
+
+		patch_predictions = np.array(patch_predictions)
+		patch_predictions /= (1.0*patch_predictions.shape[0]) 
+
+		for i in range(batch_size):
+			shape = patch_predictions[0, 0].shape
+			probs_map['mean'][x_coords[i]: x_coords[i]+shape[0] , 
+					y_coords[i]: y_coords[i]+shape[1]]  += np.mean(patch_predictions, axis=0)[i,:,:,1]
+
+			probs_map['var'][x_coords[i]: x_coords[i]+shape[0] , 
+					y_coords[i]: y_coords[i]+shape[1]]  += np.var(patch_predictions, axis=0)[i, :,:,1]
+
+			count_map[x_coords[i]: x_coords[i]+shape[0], 
+					 y_coords[i]: y_coords[i]+shape[1]] += np.ones_like(patch_predictions[0, 0, : ,:, 1])
 	
+
+
+	np.place(count_map, count_map == 0, 1)
+	probs_map['mean'] /= count_map
+	probs_map['var']  /= count_map**2.0
 	if label_path:
 		return (dataset_obj.get_image(),
 					probs_map,
-					count_map, 
 					dataset_obj.get_mask()/255, 
 					dataset_obj.get_label_mask())
 	else:
 		return (dataset_obj.get_image(),
 					probs_map,
-					count_map, 
 					dataset_obj.get_mask()/255, 
 					np.zeros(count_map.shape).astype('uint8'))
 
@@ -173,10 +194,11 @@ def getSegmentation(img_path,
 			patch_size  = 256, 
 			stride_size = 128,
 			batch_size  = 32,
-			quick       = True,
+			quick       = False,
 			tta_list    = None,
 			crf         = False,
-			save_path   = '../Results',
+			mask_path   = '../Results',
+			uncertainty_path   = '../Results',
 			status      = None,
 			mode        = 'colon'):
 	"""
@@ -275,7 +297,7 @@ def getSegmentation(img_path,
 	threshold = 0.3
 
 	if status is not None: status['status'] = "Running segmentation"
-	img, probs_map, count_map, tissue_mask, label_mask  = get_prediction(img_path, 
+	img, probs_map, tissue_mask, label_mask  = get_prediction(img_path, 
 									mask_path = None, 
 									label_path = None,
 									batch_size = batch_size,
@@ -284,30 +306,28 @@ def getSegmentation(img_path,
 									patch_size = patch_size,
 									stride_size = stride_size,
 									status = status)
-	count_map[count_map == 0] = 1
+	
 	# for key in probs_map.keys():
 	# 	probs_map[key] = BinMorphoProcessMask(probs_map[key])
-
-	digipathai_folder = os.path.join(home, '.DigiPathAI')
-	memmaps_path = os.path.join(digipathai_folder,'memmaps')
-	os.makedirs(memmaps_path,exist_ok=True)
-
-	mean_probs, uncertanity = get_mean_img(probs_map.values(), count_map, memmaps_path)
-	mean_probs = mean_probs.T
-	uncertanity = uncertanity.T
-	mean_probs = mean_probs[..., None]
 	
 	if crf:
-		pred = post_process_crf(img, np.concatenate([1-mean_probs, mean_probs], axis = -1) , 2)
+		pred = post_process_crf(img, np.concatenate([1 - probs_map['mean'].T[...,None], 
+													probs_map['mean'].T[..., None]], 
+													axis = -1) , 2)
 	else :
-		pred = mean_probs[:, :, 0] > threshold
+		pred = probs_map['mean'].T > threshold
 	
 	if status is not None:
 		status['progress'] = 100
 	
-	status['status'] = "Saving Prediction ..."
-	tifffile.imsave(save_path, pred.astype('uint8')*255, compress=9)
-	# pred = Image.fromarray(pred.astype('uint8')*255)
-	# pred.save(save_path)
-	os.system('convert ' + save_path + " -compress jpeg -quality 90 -define tiff:tile-geometry=256x256 ptif:"+save_path)
+	status['status'] = "Saving Prediction Mask..."
+	tifffile.imsave(mask_path, pred.astype('uint8')*255, compress=9)
+	os.system('convert ' + mask_path + " -compress jpeg -quality 90 -define tiff:tile-geometry=256x256 ptif:"+mask_path)
+
+	status['status'] = "Saving Prediction Uncertanity..."
+	tifffile.imsave(uncertainty_path, probs_map['var'].T*255, compress=9)
+	os.system('convert ' + uncertainty_path + " -compress jpeg -quality 90 -define tiff:tile-geometry=256x256 ptif:"+uncertainty_path)
+	
+	if status is not None:
+		status['progress'] = 0
 	return np.array(pred)
