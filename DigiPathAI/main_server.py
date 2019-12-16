@@ -113,6 +113,12 @@ def mask_exists(path):
 
 def get_mask_path(path):
     mask_path =  '-'.join(path.split('-')[:-1]+["mask"])+'.'+path.split('.')[-1]
+    mask_path = mask_path.replace('.svs', '.tiff')
+    return mask_path
+
+def get_uncertain_path(path):
+    mask_path =  '-'.join(path.split('-')[:-1]+["uncertainty"])+'.'+path.split('.')[-1]
+    mask_path = mask_path.replace('.svs', '.tiff')
     return mask_path
 
 def _get_slide(path):
@@ -151,7 +157,8 @@ def run_segmentation(status, getSegmentation):
     print(status)
     print("Starting segmentation")
     getSegmentation(img_path = status['slide_path'],
-                save_path = get_mask_path(status['slide_path']),
+                mask_path = get_mask_path(status['slide_path']),
+                uncertainty_path = get_uncertain_path(status['slide_path']),
                 status = status,
                 mode  = status['tissuetype'])
     time.sleep(0.1)
