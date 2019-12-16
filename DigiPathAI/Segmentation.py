@@ -283,9 +283,8 @@ def getSegmentation(img_path,
 
 	if not quick:
 		models_to_consider = {'dense': model_path_densenet, 
-						  'inception': model_path_inception}
-						  # , 
-						  # 'deeplabv3': model_path_deeplabv3}
+						  'inception': model_path_inception, 
+						  'deeplabv3': model_path_deeplabv3}
 	else:
 		models_to_consider = {'dense': model_path_densenet}
 
