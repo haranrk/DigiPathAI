@@ -15,6 +15,7 @@ import threading
 import time
 from queue import Queue 
 import sys
+import glob
 from flask import request
 
 SLIDE_DIR = 'examples'
@@ -79,9 +80,9 @@ class _Directory(object):
                 if cur_dir.children:
                     self.children.append(cur_dir)
             elif OpenSlide.detect_format(cur_path):
-                if 'slide' in os.path.basename(cur_path):
+                if not ('dgai-mask' in os.path.basename(cur_path)) and not ('dgai-uncertainty' in os.path.basename(cur_path)):
                     #liver-slide-1-slide.tiff -> liver-slide-1-mask.tiff
-                    if mask_exists(cur_path):
+                    if get_mask_path(cur_path):
                         self.children.append(_SlideFile(cur_relpath,True))
                     else:
                         self.children.append(_SlideFile(cur_relpath,False))
@@ -104,20 +105,23 @@ def _setup():
     app.cache = _SlideCache(app.config['SLIDE_CACHE_SIZE'], opts)
     app.segmentation_status = {"status":""}
 
-def mask_exists(path):
-    mask_path1 = '-'.join(path.split('-')[:-1]+["mask"])+'.'+path.split('.')[-1]
-    mask_path2 = mask_path1.replace('.svs', '.tiff')
-    if os.path.isfile(mask_path1) or os.path.isfile(mask_path2):
-        return True
-    else:
-        return False
+def get_mask_path_basename(path):
+    return os.path.splitext(path)[0]+'-dgai-mask'
 
 def get_mask_path(path):
-    mask_path =  '-'.join(path.split('-')[:-1]+["mask"])+'.'+path.split('.')[-1]
-    # mask_path = mask_path.replace('.svs', '.tiff')
-    return mask_path
+    '''
+        Returns the path of the associated mask if it exists or returns False
+        Example: 'folder/liver-cancer.svs > folder/liver-cancer-dgai-mask
+    '''
+    mask_path = glob.glob(get_mask_path_basename(path)+'*')
+    if mask_path == []:
+        return False
+    elif len(mask_path) >1:
+        raise ValueError("Duplicate masks found")
+    else:
+        return mask_path[0]
 
-def get_uncertain_path(path):
+def get_uncertainty_path(path):
     mask_path =  '-'.join(path.split('-')[:-1]+["uncertainty"])+'.'+path.split('.')[-1]
     # mask_path = mask_path.replace('.svs', '.tiff')
     return mask_path
@@ -159,7 +163,7 @@ def run_segmentation(status, getSegmentation):
     print("Starting segmentation")
     getSegmentation(img_path = status['slide_path'],
                 mask_path = get_mask_path(status['slide_path']),
-                uncertainty_path = get_uncertain_path(status['slide_path']),
+                uncertainty_path = get_uncertainty_path(status['slide_path']),
                 status = status,
                 mode  = status['tissuetype'])
     time.sleep(0.1)
@@ -190,13 +194,19 @@ def get_slide_properties(slide_path):
 def slide(path):
     slide= _get_slide(path)
     slide_url = url_for('dzi', path=path)
+    mask_url = get_mask_path(path)
+    uncertainty_url = get_uncertainty_path(path)
+    if mask_url  != False:
+        mask_url = '.'.join([slide_url.split('.')[0]+'-dgai-mask']+ slide_url.split('.')[1:])
+    if uncertainty_url  != False:
+        uncertainty_url = '.'.join([slide_url.split('.')[0]+'-dgai-uncertainty']+ slide_url.split('.')[1:])
+    print(slide_url)
+
     path = os.path.abspath(os.path.join(app.basedir, path))
     app.segmentation_status['slide_path'] = path
     properties = get_slide_properties(path)
-    mask_status = mask_exists(path)
-    print(slide_url)
-    print(VIEWER_ONLY)
-    return render_template('viewer.html', slide_url=slide_url,mask_status=mask_status, viewer_only=VIEWER_ONLY,properties=properties,
+
+    return render_template('viewer.html', slide_url=slide_url,mask_url=mask_url,uncertainty_url=uncertainty_url,viewer_only=VIEWER_ONLY,properties=properties,
             slide_filename=slide.filename, slide_mpp=slide.mpp, root_dir=_Directory(app.basedir) )
 
 

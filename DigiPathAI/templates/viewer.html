@@ -15,8 +15,14 @@
         <div class="col">
             <div class="row">
                     <div class="custom-control custom-switch">
-                        <input type="checkbox" class="custom-control-input" id="toggle-btn">
-                        <label class="custom-control-label" for="toggle-btn" id="overlay-text"></label>
+                        <input type="checkbox" class="custom-control-input" id="mask-toggle-btn">
+                        <label class="custom-control-label" for="mask-toggle-btn" id="mask-overlay-text"></label>
+                    </div>
+            </div>
+            <div class="row">
+                    <div class="custom-control custom-switch">
+                        <input type="checkbox" class="custom-control-input" id="uncertainty-toggle-btn">
+                        <label class="custom-control-label" for="uncertainty-toggle-btn" id="uncertainty-overlay-text"></label>
                     </div>
             </div>
             <hr/>
@@ -103,27 +109,46 @@
 <script type="text/javascript" src="../static/js/openseadragon-latest.js"></script>
 <script type="text/javascript" src="../static/js/openseadragon-scalebar.js"></script>
 <!--<script type="text/javascript" src="static/custom/multiple_img.js"></script>-->
-<script type="text/javascript">
-$(document).ready(function() {
-    $("#toggle-btn").prop('checked', false); 
+<script type="text/javascript">$(document).ready(function() {
+    $("#mask-toggle-btn").prop('checked', false); 
+    $("#uncertainty-toggle-btn").prop('checked', false); 
+
     $('[data-toggle="tooltip"]').tooltip();
-    function enable_overlay(mask_on){
+
+    function enable_mask_overlay(mask_on){
         if(mask_on){
-            $("#toggle-btn").prop('disabled', false); 
-            $("#overlay-text").text("Overlay mask");
+            $("#mask-toggle-btn").prop('disabled', false); 
+            $("#mask-overlay-text").text("Overlay mask");
         }
         else{
-            $("#toggle-btn").prop('disabled', true); 
-            $("#overlay-text").text("Mask not available");
+            $("#mask-toggle-btn").prop('disabled', true); 
+            $("#mask-overlay-text").text("Mask not available");
         }
     }
 
-    {% if mask_status %}
-    enable_overlay(true);
+    function enable_uncertainty_overlay(mask_on){
+        if(mask_on){
+            $("#uncertainty-toggle-btn").prop('disabled', false); 
+            $("#uncertainty-overlay-text").text("Overlay uncertainty");
+        }
+        else{
+            $("#uncertainty-toggle-btn").prop('disabled', true); 
+            $("#uncertainty-overlay-text").text("Uncertainty not available");
+        }
+    }
+
+    {% if mask_url==False %}
+    enable_mask_overlay(false)
     {% else %}
-    enable_overlay(false);
+    enable_mask_overlay(true);
     {% endif %}
     
+    {% if uncertainty_url == False %}
+    enable_uncertainty_overlay(false)
+    {% else %}
+    enable_uncertainty_overlay(true);
+    {% endif %}
+
     var dzi_data = {{ dzi_data|default('{}')|safe }};
     var viewer = new OpenSeadragon({
         id: "view",
@@ -153,14 +178,10 @@ $(document).ready(function() {
         backgroundColor: 'rgba(255, 255, 255, 0.5)',
     });
 
-    function open_slide(url, mpp) {
-        var tile_source, mask_source;
-        var mask_url = url.replace("node", "mask");
-        var uncertain_url = url.replace("node", "uncertainty");
+    function open_slide(url,mask_url,uncertainty_url, mpp) {
+        var tile_source, mask_source, uncertainty_source;
 
-        console.log(url);
         if (dzi_data[url]) {
-            console.log("if");
             // DZI XML provided as template argument (deepzoom_tile.py)
             tile_source = new OpenSeadragon.DziTileSource(
                     OpenSeadragon.DziTileSource.prototype.configure(
@@ -169,14 +190,13 @@ $(document).ready(function() {
                     OpenSeadragon.DziTileSource.prototype.configure(
                     OpenSeadragon.parseXml(dzi_data[mask_url]), mask_url));
             uncertain_source = new OpenSeadragon.DziTileSource(
-                    OpenSeadragon.DziTileSource.prototype.configure(
+                   OpenSeadragon.DziTileSource.prototype.configure(
                     OpenSeadragon.parseXml(dzi_data[uncertainty_url]), uncertainty_url));
         } else {
-            console.log("else");
             // DZI XML fetched from server (deepzoom_server.py)
             tile_source = url;
             mask_source = mask_url;
-            uncertain_source = uncertainty_url;
+            uncertainty_source = uncertainty_url;
         }
         viewer.open(tile_source);
         viewer.addTiledImage({
@@ -184,11 +204,21 @@ $(document).ready(function() {
             opacity: 0,
         });
         viewer.addTiledImage({
-            tileSource: uncertain_source,
+            tileSource: uncertainty_source,
             opacity: 0,
         });
 
-        $("#toggle-btn").change(function(){
+        $("#mask-toggle-btn").change(function(){
+            tiledImage = viewer.world.getItemAt(1);
+            if($(this).is(':checked')) {
+                console.log("checked");
+                tiledImage.setOpacity(0.5);
+            } else {
+                tiledImage.setOpacity(0);
+            }
+        });
+
+        $("#uncertainty-toggle-btn").change(function(){
             tiledImage = viewer.world.getItemAt(1);
             if($(this).is(':checked')) {
                 console.log("checked");
@@ -203,7 +233,7 @@ $(document).ready(function() {
         });
     }
 
-    open_slide("{{ slide_url }}", parseFloat('{{ slide_mpp }}'));
+    open_slide("{{ slide_url }}","{{ mask_url }}", "{{ uncertainty_url }}", parseFloat('{{ slide_mpp }}'));
 //    $(".load-slide").click(function(ev) {
 //        $(".current-slide").removeClass("current-slide");
 //        $(this).parent().addClass("current-slide");
@@ -223,7 +253,7 @@ $(document).ready(function() {
                     clearInterval(intervalId);
 		            location.reload(true);
                     $('#segment-progress').hide("slow");
-                    enable_overlay(true);
+                    enable_mask_overlay(true);
                 }
             });
     }
