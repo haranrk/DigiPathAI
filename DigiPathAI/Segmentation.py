@@ -320,11 +320,14 @@ def getSegmentation(img_path,
 	if status is not None:
 		status['progress'] = 100
 	
-	status['status'] = "Saving Prediction Mask..."
+	if status is not None:
+		status['status'] = "Saving Prediction Mask..."
+
 	tifffile.imsave(mask_path, pred.astype('uint8')*255, compress=9)
 	os.system('convert ' + mask_path + " -compress jpeg -quality 90 -define tiff:tile-geometry=256x256 ptif:"+mask_path)
 
-	status['status'] = "Saving Prediction Uncertanity..."
+	if status is not None:
+		status['status'] = "Saving Prediction Uncertanity..."
 	tifffile.imsave(uncertainty_path, probs_map['var'].T*255, compress=9)
 	os.system('convert ' + uncertainty_path + " -compress jpeg -quality 90 -define tiff:tile-geometry=256x256 ptif:"+uncertainty_path)
 	
