@@ -22,7 +22,8 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras import backend as K
 from tensorflow.keras.models import Model
-from tensorflow.keras.layers import (Input, BatchNormalization, Conv2D, MaxPooling2D,                             						AveragePooling2D, ZeroPadding2D, concatenate, 	
+from tensorflow.keras.layers import (Input, BatchNormalization, Conv2D, MaxPooling2D,                             					
+                    	AveragePooling2D, ZeroPadding2D, concatenate, 	
 					Concatenate, UpSampling2D, Activation, Lambda)
 from tensorflow.keras.losses import categorical_crossentropy
 from tensorflow.keras.optimizers import Adam
@@ -497,23 +498,24 @@ def apply_tta(imgs, tta):
 
 
 
-def transform_prob(data, tta):
+def transform_prob(imgs, tta):
     """
     Do inverse data augmentation
     """
-    
-    if tta == 'FLIP_LEFT_RIGHT':
-        data = np.fliplr(data)
-    elif tta == 'ROTATE_90':
-        data = np.rot90(data, 3)
-    elif tta == 'ROTATE_180':
-        data = np.rot90(data, 2)
-    elif tta == 'ROTATE_270':
-        data = np.rot90(data, 1)
-    else:
-        data = data
+    for i, img in enumerate(imgs):
+        if tta == 'FLIP_LEFT_RIGHT':
+            img = np.fliplr(img)
+        elif tta == 'ROTATE_90':
+            img = np.rot90(img, 3)
+        elif tta == 'ROTATE_180':
+            img = np.rot90(img, 2)
+        elif tta == 'ROTATE_270':
+            img = np.rot90(img, 1)
+        else:
+            img = img
+        imgs[i] = img
 
-    return data
+    return imgs
 
 def get_index(coord_ax, probs_map_shape_ax, grid_ax):
     """
