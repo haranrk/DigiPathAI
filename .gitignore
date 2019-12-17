@@ -5,6 +5,7 @@ dgai
 __pycache__/
 *.py[cod]
 *$py.class
+*examples*
 *model_weights*
 
 # C extensions
