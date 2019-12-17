@@ -152,13 +152,12 @@ def get_prediction(wsi_path,
 													   batch_size=batch_size, 
 													   verbose=verbose, steps=None)
 				try: 
-					prediction_trans = np.array([transform_prob(prediction[i], tta_) for i in range(batch_size)])
+					prediction_trans = transform_prob(prediction, tta_)
 					patch_predictions.append(prediction_trans)
 				except: continue
 
 
 		patch_predictions = np.array(patch_predictions)
-		patch_predictions /= (1.0*patch_predictions.shape[0]) 
 
 		for i in range(batch_size):
 			shape = patch_predictions[0, 0].shape
@@ -194,12 +193,13 @@ def getSegmentation(img_path,
 			patch_size  = 256, 
 			stride_size = 128,
 			batch_size  = 32,
-			quick       = True,
 			tta_list    = None,
 			crf         = False,
 			mask_path   = '../Results',
 			uncertainty_path   = '../Results',
 			status      = None,
+			quick       = True,
+			model       = 'dense',
 			mode        = 'colon'):
 	"""
 			args:
@@ -282,12 +282,22 @@ def getSegmentation(img_path,
 	session =tf.Session(config=core_config) 
 	K.set_session(session)
 
+	print ("---------------------- {}, {} ---------------".format(model, quick))
 	if not quick:
 		models_to_consider = {'dense': model_path_densenet, 
 						  'inception': model_path_inception, 
 						  'deeplabv3': model_path_deeplabv3}
 	else:
-		models_to_consider = {'dense': model_path_densenet}
+		if model == 'dense':
+			models_to_consider = {'dense': model_path_densenet}
+		elif model == 'inception':
+			models_to_consider = {'inception': model_path_inception}
+		elif model == 'deeplabv3':
+			models_to_consider = {'deeplabv3': model_path_deeplabv3}
+		else:
+			raise ValueError("Unknown model provided, allowed models ['dense', 'inception', 'deeplabv3']")
+
+
 
 	models = {}
 	for i, model_name in enumerate(models_to_consider.keys()):
