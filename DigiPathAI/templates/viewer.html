@@ -155,7 +155,8 @@ $(document).ready(function() {
 
     function open_slide(url, mpp) {
         var tile_source, mask_source;
-        var mask_url = url.replace("slide", "mask");
+        var mask_url = url.replace("node", "mask");
+        var uncertain_url = url.replace("node", "uncertainty");
 
         console.log(url);
         if (dzi_data[url]) {
@@ -167,15 +168,23 @@ $(document).ready(function() {
             mask_source = new OpenSeadragon.DziTileSource(
                     OpenSeadragon.DziTileSource.prototype.configure(
                     OpenSeadragon.parseXml(dzi_data[mask_url]), mask_url));
+            uncertain_source = new OpenSeadragon.DziTileSource(
+                    OpenSeadragon.DziTileSource.prototype.configure(
+                    OpenSeadragon.parseXml(dzi_data[uncertainty_url]), uncertainty_url));
         } else {
             console.log("else");
             // DZI XML fetched from server (deepzoom_server.py)
             tile_source = url;
-            mask_source = mask_url
+            mask_source = mask_url;
+            uncertain_source = uncertainty_url;
         }
         viewer.open(tile_source);
         viewer.addTiledImage({
             tileSource: mask_source,
+            opacity: 0,
+        });
+        viewer.addTiledImage({
+            tileSource: uncertain_source,
             opacity: 0,
         });
 
