@@ -196,7 +196,7 @@ class WSIStridedPatchDataset(Dataset):
     """
     def __init__(self, wsi_path, mask_path, label_path=None, image_size=256,
                  normalize=True, flip='NONE', rotate='NONE',                
-                 level=5, sampling_stride=16, roi_masking=True):
+                 mask_level=5, sampling_stride=16, roi_masking=True):
         """
         Initialize the data producer.
 
@@ -229,7 +229,7 @@ class WSIStridedPatchDataset(Dataset):
         self._normalize = normalize
         self._flip = flip
         self._rotate = rotate
-        self._level = level
+        self._level = mask_level
         self._sampling_stride = sampling_stride
         self._roi_masking = roi_masking
         
@@ -237,18 +237,22 @@ class WSIStridedPatchDataset(Dataset):
 
     def _preprocess(self):
         self._slide = openslide.OpenSlide(self._wsi_path)
+        if self._level == -1:
+            self._level = len(self._slide.level_dimensions) -1 
+        self._sampling_stride = self._sampling_stride//int(self._slide.level_downsamples[self._level])
+        print("Level %d (Highest level %d) , stride %d" %(self._level, self._slide.level_count-1,self._sampling_stride ))
+        X_slide, Y_slide = self._slide.level_dimensions[0]
+        print("Actual dimensions: (%d,%d)" %(X_slide,Y_slide))
+        X_slide_level_dim, Y_slide_level_dim = self._slide.level_dimensions[self._level]
+        print("Level dimensions: (%d,%d)" %(X_slide_level_dim,Y_slide_level_dim))
         
         if self._label_path is not None:
             self._label_slide = openslide.OpenSlide(self._label_path)
         
-        X_slide, Y_slide = self._slide.level_dimensions[0]
-        print("Image dimensions: (%d,%d)" %(X_slide,Y_slide))
         
         factor = self._sampling_stride
-        self._level = len(self._slide.level_dimensions) - 1
-        self._sampling_stride = self._sampling_stride / (2.0**self._level)
-
-        print (self._level)
+        # self._level = len(self._slide.level_dimensions) - 1
+        # self._sampling_stride = self._sampling_stride / (2.0**self._level)
 
         if self._mask_path is not None:
             mask_file_name = os.path.basename(self._mask_path)

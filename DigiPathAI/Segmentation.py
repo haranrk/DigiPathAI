@@ -71,6 +71,7 @@ def get_prediction(wsi_path,
 				   verbose=0, 
 				   patch_size = 256,
 				   stride_size = 256,
+                                   mask_level = -1,
 				   status = None):
 	"""
 			patch based segmentor
@@ -83,6 +84,7 @@ def get_prediction(wsi_path,
 										normalize=True,
 										flip=None, rotate=None,
 										sampling_stride=stride_size, 
+                                                                                mask_level=mask_level,
 										roi_masking=True)
 
 
@@ -199,6 +201,7 @@ def getSegmentation(img_path,
 			uncertainty_path   = '../Results',
 			status      = None,
 			quick       = True,
+                        mask_level       = -1,
 			model       = 'dense',
 			mode        = 'colon'):
 	"""
@@ -302,13 +305,15 @@ def getSegmentation(img_path,
 	models = {}
 	for i, model_name in enumerate(models_to_consider.keys()):
 		models[model_name] = load_trained_models(model_name, 
-								models_to_consider[model_name])
+								models_to_consider[model_name],
+								patch_size = patch_size)
 
 	threshold = 0.3
 
 	if status is not None: status['status'] = "Running segmentation"
 	img, probs_map, tissue_mask, label_mask  = get_prediction(img_path, 
 									mask_path = None, 
+                                                                        mask_level = mask_level,
 									label_path = None,
 									batch_size = batch_size,
 									tta_list = tta_list,
