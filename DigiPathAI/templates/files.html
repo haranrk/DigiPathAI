@@ -12,6 +12,7 @@
 <div class="container">
     <h1>Available Slides</h1>
     <br>
+    <h5>{{ root_dir.full_name }}</h5>
     <table class="table table-sm bg-light table-bordered table-hover">
         <thead class="">
             <tr>
@@ -23,8 +24,8 @@
         <tbody>
         {% for entry in root_dir.children recursive %}
             <tr>
-                <th scope="row">{{ loop.index }}</th>
                 {% if entry.url_path %}
+                <th scope="row">{{ loop.index }}</th>
                 <td>
                     <a href="{{ url_for('slide', path=entry.url_path) }}">
                         {{ entry.name }}
@@ -37,19 +38,27 @@
                         Not Available
                     {% endif %}
                  </td>
-                {% else %}
-                    {{ entry.name }}
-                {% endif %}
+                {% elif entry.children %}
+        </tbody>
+    </table>
+    <h5>{{ entry.full_name }}</h5>
+    <table class="table table-sm bg-light table-bordered table-hover">
+        <thead class="">
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Image</th>
+                <th scope="col">Mask Status</th>
+            </tr>
+        </thead>
+        <tbody>
+                    {{ loop(entry.children) }}
 
-                {% if entry.children %}
-                    <ul>
-                        {{ loop(entry.children) }}
-                    </ul>
+                {% else %}
+        </tbody>
+    </table>
                 {% endif %}
             </tr>
         {% endfor %}
-        </tbody>
-    </table>
 </div>
 </body>
 <script type="text/javascript" src="../static/js/jquery-3.4.1.min.js"></script>

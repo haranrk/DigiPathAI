@@ -70,6 +70,7 @@ class _SlideCache(object):
 class _Directory(object):
     def __init__(self, basedir, relpath=''):
         self.name = os.path.basename(relpath)
+        self.full_name = '.' if relpath=='' else './'+relpath
         self.children = []
         self.children_masks = []
         for name in sorted(os.listdir(os.path.join(basedir, relpath))):
