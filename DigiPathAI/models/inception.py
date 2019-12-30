@@ -170,11 +170,9 @@ def get_inception_resnet_v2_unet_softmax(input_shape, weights='imagenet'):
     n_channel = 3
     n_class = 2
     img_input = Input(input_shape + (n_channel,))
-
-    inp = Input(input_shape + (3,))
     
     # Stem block: 35 x 35 x 192
-    x = conv2d_bn(inp, 32, 3, strides=2, padding='same')
+    x = conv2d_bn(img_input, 32, 3, strides=2, padding='same')
     x = conv2d_bn(x, 32, 3, padding='same')
     x = conv2d_bn(x, 64, 3)
     conv1 = x
@@ -268,7 +266,7 @@ def get_inception_resnet_v2_unet_softmax(input_shape, weights='imagenet'):
     conv10 = conv_block(conv10, 64)
     res = Conv2D(n_class, (1, 1), activation='softmax')(conv10)
     
-    model = Model(inp, res)
+    model = Model(img_input, res)
 
     return model
 
