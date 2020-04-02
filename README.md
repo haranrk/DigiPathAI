@@ -1,3 +1,4 @@
+[![PyPI version](https://badge.fury.io/py/DigiPathAI.svg)](https://badge.fury.io/py/DigiPathAI)
 # DigiPathAI
 A software application built on top of [openslide](https://openslide.org/) for viewing [whole slide images (WSI)](https://www.ncbi.nlm.nih.gov/pubmed/30307746) and performing pathological analysis 
 
