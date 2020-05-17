@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 setuptools.setup(
      name='DigiPathAI',  
-     version='0.1.4',
+     version='0.1.5',
      author="Avinash Kori, Haran Rajkumar",
      author_email="koriavinash1@gmail.com, haranrajkumar97@gmail.com",
      description="Deep Learning toolbox for WSI (digital histopatology) analysis",
@@ -13,7 +13,7 @@ setuptools.setup(
      long_description_content_type="text/markdown",
      url="https://github.com/haranrk/DigiPathAI",
      packages=setuptools.find_packages(),
-     package_data={'': ['LICENSE', '*/static/*','*/templates/*' ]},
+     # package_data={'': ['LICENSE', '*/static/*','*/templates/*' ]},
      install_requires = [
          'flask',
          'openslide-python',

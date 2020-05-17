@@ -1,6 +1,18 @@
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/cbc70e33c4a14effb4bc9dd5d5b25bb4)](https://app.codacy.com/manual/haranrk/DigiPathAI?utm_source=github.com&utm_medium=referral&utm_content=haranrk/DigiPathAI&utm_campaign=Badge_Grade_Dashboard)
+[![PyPI version](https://badge.fury.io/py/DigiPathAI.svg)](https://badge.fury.io/py/DigiPathAI)
 # DigiPathAI
 A software application built on top of [openslide](https://openslide.org/) for viewing [whole slide images (WSI)](https://www.ncbi.nlm.nih.gov/pubmed/30307746) and performing pathological analysis 
 
+### Citation
+If you find this reference implementation useful in your research, please consider citing:
+```
+@article{khened2020generalized,
+  title={A Generalized Deep Learning Framework for Whole-Slide Image Segmentation and Analysis},
+  author={Khened, Mahendra and Kori, Avinash and Rajkumar, Haran and Srinivasan, Balaji and Krishnamurthi, Ganapathy},
+  journal={arXiv preprint arXiv:2001.00258},
+  year={2020}
+}
+```
 # Features
 - Responsive WSI image viewer 
 - State of the art cancer AI pipeline to segment and display the cancerous tissue regions
