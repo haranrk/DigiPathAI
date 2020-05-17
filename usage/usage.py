@@ -5,23 +5,18 @@ import sys
 import numpy as np
 import openslide
 import matplotlib.pyplot as plt
-import cv2
 import matplotlib.gridspec as gridspec
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-
-
+import cv2
+kernel = np.ones((5,5), np.uint8) 
 
 from PIL import Image
 sys.path.append('..')
 from DigiPathAI.Segmentation import getSegmentation
 
-
-kernel = np.ones((11, 11), np.uint8) 
-
-
 digestpath_imgs = ['../examples/colon-cancer-1.tiff']
 
-paip_imgs       = ['../examples/liver-1.svs']
+paip_imgs       = ['../examples/examples/tcga/liver-1.svs']
 
 tcga_imgs       = ['../examples/examples/tcga/TCGA-CM.svs']
 
@@ -30,6 +25,12 @@ camelyon_imgs   = ['../examples/Camelyon_16_Test_samples/camelyon-1.tif']
 
 models = ['dense', 'inception', 'deeplabv3', 'ensemble', 'epistemic']
 
+def iou(gt, mask):
+    gt = np.uint8(np.array(gt>0.1))
+    mask = np.uint8(np.array(mask>0.1))
+    nr = np.sum(gt*mask)*2.0
+    dr = np.sum(gt + mask)*1.0
+    return nr/dr 
 
 for path in tcga_imgs:
   ext = os.path.splitext(path)[1]
@@ -60,8 +61,8 @@ for path in tcga_imgs:
           mask_level = 4,
           model       = model,
           mode        = 'breast')
+    
     """
-
     slide = openslide.OpenSlide(path)
     level = len(slide.level_dimensions) - 1
     img_dimensions = slide.level_dimensions[-1]
@@ -70,24 +71,27 @@ for path in tcga_imgs:
     mask = openslide.OpenSlide(base_path + '-DigiPathAI_{}_mask'.format(model) + '.tiff')
     level = np.where([1 if ((dim[0] == img_dimensions[0])*(dim[1] == img_dimensions[1])) else 0 for dim in mask.level_dimensions])[0]
     mask = np.array(mask.read_region((0,0), level, img_dimensions).convert('L'))
-    mask = cv2.dilate(mask, kernel, iterations=1) 
-
+    mask = cv2.dilate(mask, kernel, iterations=2) 
 
     uncertainty = openslide.OpenSlide(base_path + '-DigiPathAI_{}_uncertainty'.format(model) + '.tiff')
     level = np.where([1 if ((dim[0] == img_dimensions[0])*(dim[1] == img_dimensions[1])) else 0 for dim in uncertainty.level_dimensions])[0]
     uncertainty = np.array(uncertainty.read_region((0,0), level, img_dimensions).convert('L'))
-
-    # gt = openslide.OpenSlide(glob.glob(base_path + '-gt*')[0])
-    # level = np.where([1 if ((dim[0] == img_dimensions[0])*(dim[1] == img_dimensions[1])) else 0 for dim in gt.level_dimensions])[0]
-    # gt = np.array(gt.read_region((0,0), level, img_dimensions).convert('L'))*255
     
-
-    # gt = np.array(Image.fromarray(gt).resize(img_dimensions, Image.NEAREST))
+    gt = openslide.OpenSlide(glob.glob(base_path + '-gt*')[0])
+    level = np.where([1 if ((dim[0] == img_dimensions[0])*(dim[1] == img_dimensions[1])) else 0 for dim in gt.level_dimensions])[0]
+    gt = np.array(gt.read_region((0,0), level, img_dimensions).convert('L'))*255
+    gt = np.array(Image.fromarray(gt).resize(img_dimensions, Image.NEAREST))
+    
     mask = np.array(Image.fromarray(mask).resize(img_dimensions, Image.NEAREST))
     uncertainty = np.array(Image.fromarray(uncertainty).resize(img_dimensions))/255.0
-    # gt = np.array(Image.open(base_path[:-5] + 'gt.jpg').convert('RGB').resize(img_dimensions))
+    # gt = np.array(Image.open(base_path + 'gt.jpg').convert('L').resize(img_dimensions))
+    
 
-    fig, ax = plt.subplots(1, 3, figsize=(10, 40))
+
+    print ("path: {}, model: {}, IoU: {}".format(path, model, iou(gt, mask)))
+    
+
+    fig, ax = plt.subplots(1, 4, figsize=(10, 40))
     im_ = ax[0].imshow(img)
     ax[0].set_xticklabels([])
     ax[0].set_yticklabels([])
@@ -96,7 +100,7 @@ for path in tcga_imgs:
     ax[0].set_aspect('equal')
     ax[0].tick_params(bottom='off', top='off', labelbottom='off', right='off', left='off', labelleft='off' )
     
-    """
+
     im_ = ax[1].imshow(img)
     gt_ = ax[1].imshow(gt, alpha = 0.5, cmap='gray')
     ax[1].set_xticklabels([])
@@ -105,30 +109,30 @@ for path in tcga_imgs:
     ax[1].set_yticks([])
     ax[1].set_aspect('equal')
     ax[1].tick_params(bottom='off', top='off', labelbottom='off', right='off', left='off', labelleft='off' )
-    """
-
-    im_ = ax[1].imshow(img)
-    mask_ = ax[1].imshow(mask, alpha = 0.5, cmap='gray')
-    ax[1].set_xticklabels([])
-    ax[1].set_yticklabels([])
-    ax[1].set_xticks([])
-    ax[1].set_yticks([])
-    ax[1].set_aspect('equal')
-    ax[1].tick_params(bottom='off', top='off', labelbottom='off', right='off', left='off', labelleft='off' )
     
     im_ = ax[2].imshow(img)
-    uncertain_ = ax[2].imshow(uncertainty, alpha = 0.5, cmap=plt.cm.RdBu_r)
+    mask_ = ax[2].imshow(mask, alpha = 0.5, cmap='gray')
     ax[2].set_xticklabels([])
     ax[2].set_yticklabels([])
     ax[2].set_xticks([])
     ax[2].set_yticks([])
     ax[2].set_aspect('equal')
     ax[2].tick_params(bottom='off', top='off', labelbottom='off', right='off', left='off', labelleft='off' )
+    
+    im_ = ax[3].imshow(img)
+    uncertain_ = ax[3].imshow(uncertainty, alpha = 0.5, cmap=plt.cm.RdBu_r)
+    ax[3].set_xticklabels([])
+    ax[3].set_yticklabels([])
+    ax[3].set_xticks([])
+    ax[3].set_yticks([])
+    ax[3].set_aspect('equal')
+    ax[3].tick_params(bottom='off', top='off', labelbottom='off', right='off', left='off', labelleft='off' )
 
-    cax = fig.add_axes([ax[2].get_position().x1 + 0.01,
-              ax[2].get_position().y0,
+    cax = fig.add_axes([ax[3].get_position().x1 + 0.01,
+              ax[3].get_position().y0,
               0.01,
-              ax[2].get_position().y1-ax[2].get_position().y0])
+              ax[3].get_position().y1-ax[3].get_position().y0])
     fig.colorbar(uncertain_, cax=cax)
 
     plt.savefig(base_path+'DigiPath_Results_{}.png'.format(model), bbox_inches='tight')
+    
