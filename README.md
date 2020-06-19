@@ -1,5 +1,7 @@
-[![Codacy Badge](https://api.codacy.com/project/badge/Grade/cbc70e33c4a14effb4bc9dd5d5b25bb4)](https://app.codacy.com/manual/haranrk/DigiPathAI?utm_source=github.com&utm_medium=referral&utm_content=haranrk/DigiPathAI&utm_campaign=Badge_Grade_Dashboard)
 [![PyPI version](https://badge.fury.io/py/DigiPathAI.svg)](https://badge.fury.io/py/DigiPathAI)
+[![arXiv](https://img.shields.io/badge/arXiv-2001.00258-<COLOR>.svg)](https://arxiv.org/abs/2001.00258)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/cbc70e33c4a14effb4bc9dd5d5b25bb4)](https://app.codacy.com/manual/haranrk/DigiPathAI?utm_source=github.com&utm_medium=referral&utm_content=haranrk/DigiPathAI&utm_campaign=Badge_Grade_Dashboard)
+
 # DigiPathAI
 A software application built on top of [openslide](https://openslide.org/) for viewing [whole slide images (WSI)](https://www.ncbi.nlm.nih.gov/pubmed/30307746) and performing pathological analysis 
 
