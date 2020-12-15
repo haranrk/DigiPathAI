@@ -30,9 +30,6 @@ If you find this reference implementation useful in your research, please consid
   <img width="460" height="300" src="imgs/results_1.png">
 </p>
 
-# Online Demo
-https://digipathai.tech/
-
 # Installation
 Running of the AI pipeline requires a GPU and several deep learning modules. However, you can run just the UI as well.
 
