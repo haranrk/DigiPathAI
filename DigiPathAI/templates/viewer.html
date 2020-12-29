@@ -20,10 +20,10 @@
                     </div>
             </div>
             <div class="row">
-                    <div class="custom-control custom-switch">
-                        <input type="checkbox" class="custom-control-input" id="uncertainty-toggle-btn">
-                        <label class="custom-control-label" for="uncertainty-toggle-btn" id="uncertainty-overlay-text"></label>
-                    </div>
+                    <!--<div class="custom-control custom-switch">-->
+                        <!--<input type="checkbox" class="custom-control-input" id="uncertainty-toggle-btn">-->
+                        <!--<label class="custom-control-label" for="uncertainty-toggle-btn" id="uncertainty-overlay-text"></label>-->
+                    <!--</div>-->
             </div>
             <hr/>
             <div class="row">
@@ -118,7 +118,7 @@
     function enable_mask_overlay(mask_on){
         if(mask_on){
             $("#mask-toggle-btn").prop('disabled', false); 
-            $("#mask-overlay-text").text("Overlay mask");
+            $("#mask-overlay-text").text("Show Cancer Regions");
         }
         else{
             $("#mask-toggle-btn").prop('disabled', true); 
