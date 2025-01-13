@@ -1,5 +1,5 @@
 [![PyPI version](https://badge.fury.io/py/DigiPathAI.svg)](https://badge.fury.io/py/DigiPathAI)
-[![Downloads](https://pepy.tech/badge/digipathai)](https://pepy.tech/project/digipathai)
+[![PyPI Downloads](https://static.pepy.tech/badge/digipathai)](https://pepy.tech/projects/digipathai)
 [![arXiv](https://img.shields.io/badge/arXiv-2001.00258-<COLOR>.svg)](https://arxiv.org/abs/2001.00258)
 
 
