@@ -15,7 +15,7 @@ setuptools.setup(
      packages=setuptools.find_packages(),
      # package_data={'': ['LICENSE', '*/static/*','*/templates/*' ]},
      install_requires = [
-         'flask==2.2.5',
+         'flask==3.1.3',
          'openslide-python',
          ],
      extras_require={
